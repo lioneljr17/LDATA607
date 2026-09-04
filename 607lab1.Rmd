@@ -1,0 +1,38 @@
+---
+title: "607 peoject1"
+author: "Lionel jr desroses"
+output: html_document
+date: "2026-09-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+for this project I plan on researching the correlation between higher income and graduated level. i Plan on finding a data set on students application for school over the pass years and also checking the amount number of graduate while comparing the different data set with wages_by_education. this would give a great explanation on the importance of higher education in different race. 
+
+##What data challenges do you anticipate?
+I anticipating many challenge through-out this transformation process. as you can see my dataset is a completely mess and it would take a lot of work to tune these data and make them tell a story for me. I do plans on fixing and tuning the data. 
+
+
+
+
+```{r wages_by_edu}
+library(readr)
+wage_by_edu <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/wage_by_edu.csv")
+#View(wage_by_edu)
+summary (wage_by_edu) 
+#summary (cc_state_sector_grads)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+
+```{r pressure, echo=FALSE}
+#plot(wage_by_edu)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
