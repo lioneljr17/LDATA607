@@ -23,54 +23,63 @@ I anticipating many challenge through-out this transformation process. as you ca
 ```{r wages_by_edu}
 library(readr)
 wage_by_edu <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/wage_by_edu.csv")
-library(readr)
-cc_state_sector_grads <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/cc_state_sector_grads.csv")
-library(readr)
-graduates <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/graduates.csv")
-#View(graduates)
-#View(cc_state_sector_grads)
-#View(wage_by_edu)
-#summary (wage_by_edu) 
-#summary (cc_state_sector_grads)
-#summary (graduates)
 names(wage_by_edu)
 
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-
-```{r pressure, echo=FALSE}
-#plot(wage_by_edu)
-ggplot()+ geom_line(data = wage_by_edu, aes(x = year, y = some_college)) + 
-  geom_line(aes(x = year, y = high_school), data= wage_by_edu, colour = 'red')+
-  geom_line(aes(x = year, y =bachelors_degree), data= wage_by_edu, colour = 'green')
-
-
+#library(readr)
+#cc_state_sector_grads <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/cc_state_sector_grads.csv")
+#library(readr)
+#graduates <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/graduates.csv")
 ```
 
 
-``` {r framing Data }
+
+
+``` {r framing Data-wage_by_LevelOfEdu }
 wage_by_LevelOfEdu <- wage_by_edu%>%
   select(year,less_than_hs,high_school,some_college,bachelors_degree,advanced_degree)%>%
   rename (Year =year, No_Diploma=less_than_hs,High_school_diploma=high_school, associates_degree =some_college, Bachelors_Degree =bachelors_degree, Graduate_School=advanced_degree)
 
 head (wage_by_LevelOfEdu)
 summary(wage_by_LevelOfEdu)
-names(wage_by_edu)
+
 ```
 
-```{r framing Data 2}
+```{r framing Data-wage_by_LevelOfEdu_gender}
 wage_by_LevelOfEdu_gender <- wage_by_edu%>%
   select (year,men_less_than_hs,men_high_school,men_some_college,men_bachelors_degree,men_advanced_degree,women_less_than_hs,women_high_school,women_some_college,women_bachelors_degree,women_advanced_degree)
 
+head (wage_by_LevelOfEdu_gender)
+summary(wage_by_LevelOfEdu_gender)
+
 ```
 
-```{r framing Data 2}
+```{r framing Data -wage_by_LevelOfEdu_race}
 wage_by_LevelOfEdu_race <- wage_by_edu%>%
   select (year,white_less_than_hs,white_high_school,white_some_college,white_bachelors_degree,white_advanced_degree,black_less_than_hs,black_high_school,black_some_college,black_bachelors_degree,black_advanced_degree,hispanic_less_than_hs,hispanic_high_school,hispanic_some_college,hispanic_bachelors_degree,hispanic_advanced_degree)
+
+head (wage_by_LevelOfEdu_race)
+summary(wage_by_LevelOfEdu_race)
+
+```
+
+```{r trying out graph}
+#plot(wage_by_edu)
+ggplot()+ geom_line(data = wage_by_edu, aes(x = year, y = less_than_hs,color ="Less High")) + 
+  geom_line(data= wage_by_edu,aes(x = year, y = high_school, color="High School"))+
+  geom_line(data= wage_by_edu,aes(x = year, y = some_college, color="Some College"))+
+  geom_line(data= wage_by_edu, aes(x = year, y =bachelors_degree, color ="Bachelor's Degree")) +
+  geom_line(data= wage_by_edu,aes(x = year, y =advanced_degree,color ="Advanced Degree"))+ 
+  labs(title ="Average Wages By Education level",x ="Years",y="Average wages")+
+   scale_color_manual(values = c(
+     "Less High" = 'black',
+      "High School" = 'red',
+      "Some College" = 'blue',
+      "Bachelor's Degree" = 'green',
+      "Advanced Degree"='orange'
+    )
+  ) +theme_minimal()
+
+
 ```
 
 
