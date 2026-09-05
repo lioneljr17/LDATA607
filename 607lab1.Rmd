@@ -2,7 +2,7 @@
 title: "DATA 607 assignment 1:Loading Data into a Data Frame"
 author: "Lionel jr. desroses"
 output: html_document
-date: "2026-09-03"
+date: "2026-09-05"
 ---
 
 ```{r setup, include=FALSE}
@@ -12,25 +12,24 @@ library(tidyverse)
 ```
 
 ## Introduction
-for this project I plan on researching the correlation between higher income and graduated level. i Plan on finding a data set on students application for school over the pass years and also checking the amount number of graduate while comparing the different data set with wages_by_education. this would give a great explanation on the importance of higher education in different race. 
 
-##What data challenges do you anticipate?
-I anticipating many challenge through-out this transformation process. as you can see my dataset is a completely mess and it would take a lot of work to tune these data and make them tell a story for me. I do plans on fixing and tuning the data.
+This project examines the relationship between educational attainment and income levels in the United States. The analysis uses wage data categorized by educational attainment and compares them with graduation and educational attainment datasets to investigate whether higher levels of education are associated with higher earnings. The analysis will also consider differences across demographic groups, including gender and race, to explore whether the relationship between education and income varies across populations.
+
+The project successfully retrieved wage data from a publicly accessible website(www.kaggle.com) and I transformed the dataset into multiple data frames to facilitate analysis. I organized the data according to key demographic and educational variables, including education level, gender, and race. This structure will support subsequent analysis and visualization while allowing for comparisons of income patterns across educational and demographic groups.
 
 
+Data Source:
+https://www.kaggle.com/datasets/asaniczka/wages-by-education-in-the-usa-1973-2022/data
 
+GitHub repository data Raw source:
+  https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/wage_by_edu.csv
 
 ```{r wages_by_edu}
 library(readr)
 wage_by_edu <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/wage_by_edu.csv")
 names(wage_by_edu)
 
-#library(readr)
-#cc_state_sector_grads <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/cc_state_sector_grads.csv")
-#library(readr)
-#graduates <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/graduates.csv")
 ```
-
 
 
 
@@ -64,14 +63,14 @@ summary(wage_by_LevelOfEdu_race)
 
 ```{r trying out graph}
 #plot(wage_by_edu)
-ggplot()+ geom_line(data = wage_by_edu, aes(x = year, y = less_than_hs,color ="Less High")) + 
+ggplot()+ geom_line(data = wage_by_edu, aes(x = year, y = less_than_hs,color ="Less Than High School")) + 
   geom_line(data= wage_by_edu,aes(x = year, y = high_school, color="High School"))+
   geom_line(data= wage_by_edu,aes(x = year, y = some_college, color="Some College"))+
   geom_line(data= wage_by_edu, aes(x = year, y =bachelors_degree, color ="Bachelor's Degree")) +
   geom_line(data= wage_by_edu,aes(x = year, y =advanced_degree,color ="Advanced Degree"))+ 
-  labs(title ="Average Wages By Education level",x ="Years",y="Average wages")+
+  labs(title ="Average Wages By Education level",x ="Years",y="Average wages", color ="Education Level")+
    scale_color_manual(values = c(
-     "Less High" = 'black',
+     "Less Than High School" = 'black',
       "High School" = 'red',
       "Some College" = 'blue',
       "Bachelor's Degree" = 'green',
@@ -83,4 +82,9 @@ ggplot()+ geom_line(data = wage_by_edu, aes(x = year, y = less_than_hs,color ="L
 ```
 
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+#Conclusion
+
+   I was successfully able to retrieve the wage dataset from a publicly accessible GitHub repository and transform it into several structured data frames organized by education level, gender, and race. Relevant variables were selected, renamed, and reformatted to create a cleaner and more interpretable dataset for analysis. The visualization of average wages by educational attainment shows a positive association between education and earnings, with individuals holding bachelor’s and advanced degrees generally reporting higher average wages than those with lower levels of education. While these findings provide preliminary evidence of a relationship between educational attainment and income, the current analysis does not establish a causal relationship. Future analysis could integrate graduation and educational attainment statistics with wage data to further examine how educational achievement is associated with income across gender and racial groups and how these patterns have changed over time.
+
+
