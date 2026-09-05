@@ -13,7 +13,7 @@ library(tidyverse)
 
 ## Introduction
 
-This project examines the relationship between educational attainment and income levels in the United States. The analysis uses wage data categorized by educational attainment and compares them with graduation and educational attainment datasets to investigate whether higher levels of education are associated with higher earnings. The analysis will also consider differences across demographic groups, including gender and race, to explore whether the relationship between education and income varies across populations.
+This project examines the relationship between educational attainment and income levels in the United States. The analysis uses wage data categorized by educational attainment and prepare the data for future comparisons with graduation and educational attainment datasets, to investigate whether higher levels of education are associated with higher earnings. The analysis will also consider differences across demographic groups, including gender and race, to explore whether the relationship between education and income varies across populations.
 
 The project successfully retrieved wage data from a publicly accessible dataset and I transformed the dataset into multiple data frames to facilitate analysis. I organized the data according to key demographic and educational variables, including education level, gender, and race. This structure will support subsequent analysis and visualization while allowing for comparisons of income patterns across educational and demographic groups.
 
@@ -23,6 +23,7 @@ https://www.kaggle.com/datasets/asaniczka/wages-by-education-in-the-usa-1973-202
 
 ### GitHub repository data Raw source:
   https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/wage_by_edu.csv
+  
 
 ```{r wages_by_edu}
 library(readr)
@@ -31,7 +32,8 @@ names(wage_by_edu)
 
 ```
 
-
+## Data Tranformation
+The first step in the analysis was to load the wage dataset from a publicly accessible website into my GitHub Repository, which was successful. After reviewing the availability variables, I selected a subset of columns related to educational attainment. The select columns were renamed to improve readability and to make the Dataset easier to interpret.
 
 ``` {r framing Data-wage_by_LevelOfEdu }
 wage_by_LevelOfEdu <- wage_by_edu%>%
@@ -42,6 +44,9 @@ head (wage_by_LevelOfEdu)
 summary(wage_by_LevelOfEdu)
 
 ```
+
+## Additional Data Frames
+To help support future analysis, another subset of columns related to educational attainment by gender and racial demographic groups. These transformed Datasets allow for more focused comparisons of wage trends across different populations while maintaining the original data structure.
 
 ```{r framing Data-wage_by_LevelOfEdu_gender}
 wage_by_LevelOfEdu_gender <- wage_by_edu%>%

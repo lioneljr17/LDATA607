@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/1456297/94f314b7d751490a8c9019db54fb12f7
+bundleId: https://api.rpubs.com/api/v1/document/1456297/94f314b7d751490a8c9019db54fb12f7
+url: http://rpubs.com/lionlejr17/1456297
+version: 1
