@@ -15,13 +15,13 @@ library(tidyverse)
 
 This project examines the relationship between educational attainment and income levels in the United States. The analysis uses wage data categorized by educational attainment and compares them with graduation and educational attainment datasets to investigate whether higher levels of education are associated with higher earnings. The analysis will also consider differences across demographic groups, including gender and race, to explore whether the relationship between education and income varies across populations.
 
-The project successfully retrieved wage data from a publicly accessible website(www.kaggle.com) and I transformed the dataset into multiple data frames to facilitate analysis. I organized the data according to key demographic and educational variables, including education level, gender, and race. This structure will support subsequent analysis and visualization while allowing for comparisons of income patterns across educational and demographic groups.
+The project successfully retrieved wage data from a publicly accessible dataset and I transformed the dataset into multiple data frames to facilitate analysis. I organized the data according to key demographic and educational variables, including education level, gender, and race. This structure will support subsequent analysis and visualization while allowing for comparisons of income patterns across educational and demographic groups.
 
 
-Data Source:
+### Data Source:
 https://www.kaggle.com/datasets/asaniczka/wages-by-education-in-the-usa-1973-2022/data
 
-GitHub repository data Raw source:
+### GitHub repository data Raw source:
   https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/wage_by_edu.csv
 
 ```{r wages_by_edu}
@@ -36,7 +36,7 @@ names(wage_by_edu)
 ``` {r framing Data-wage_by_LevelOfEdu }
 wage_by_LevelOfEdu <- wage_by_edu%>%
   select(year,less_than_hs,high_school,some_college,bachelors_degree,advanced_degree)%>%
-  rename (Year =year, No_Diploma=less_than_hs,High_school_diploma=high_school, associates_degree =some_college, Bachelors_Degree =bachelors_degree, Graduate_School=advanced_degree)
+  rename (Year =year, No_Diploma=less_than_hs,High_school_diploma=high_school, Some_college=some_college, Bachelors_Degree =bachelors_degree, Graduate_School=advanced_degree)
 
 head (wage_by_LevelOfEdu)
 summary(wage_by_LevelOfEdu)
@@ -68,7 +68,7 @@ ggplot()+ geom_line(data = wage_by_edu, aes(x = year, y = less_than_hs,color ="L
   geom_line(data= wage_by_edu,aes(x = year, y = some_college, color="Some College"))+
   geom_line(data= wage_by_edu, aes(x = year, y =bachelors_degree, color ="Bachelor's Degree")) +
   geom_line(data= wage_by_edu,aes(x = year, y =advanced_degree,color ="Advanced Degree"))+ 
-  labs(title ="Average Wages By Education level",x ="Years",y="Average wages", color ="Education Level")+
+  labs(title ="Average Wages By Education level",x ="Year",y="Average wages(USD)", color ="Education Level")+
    scale_color_manual(values = c(
      "Less Than High School" = 'black',
       "High School" = 'red',
@@ -83,7 +83,7 @@ ggplot()+ geom_line(data = wage_by_edu, aes(x = year, y = less_than_hs,color ="L
 
 
 
-#Conclusion
+## Conclusion
 
    I was successfully able to retrieve the wage dataset from a publicly accessible GitHub repository and transform it into several structured data frames organized by education level, gender, and race. Relevant variables were selected, renamed, and reformatted to create a cleaner and more interpretable dataset for analysis. The visualization of average wages by educational attainment shows a positive association between education and earnings, with individuals holding bachelor’s and advanced degrees generally reporting higher average wages than those with lower levels of education. While these findings provide preliminary evidence of a relationship between educational attainment and income, the current analysis does not establish a causal relationship. Future analysis could integrate graduation and educational attainment statistics with wage data to further examine how educational achievement is associated with income across gender and racial groups and how these patterns have changed over time.
 
