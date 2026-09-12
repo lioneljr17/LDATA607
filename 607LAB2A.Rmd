@@ -1,0 +1,111 @@
+---
+title: "DATA 607 assignment 2A:SQL and R"
+author: "Lionel jr. desroses"
+output: html_document
+editor: visual
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    code-tools: true
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+date: "2026-09-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(DBI)
+library(RPostgres)
+```
+
+## Introduction
+
+## Planned Approach
+
+For this project, I will create a small movie ratings database that collects ratings from at least 5 participants for 6 recent popular movies. To gather the data, I plan to use either a Microsoft Form or a Google Form, in which participants can provide their ratings on a scale from 1 to 5, with 1 representing "strongly dislike" and 5 representing "strongly like." Participants will also have the option to use a nickname instead of their real name if they prefer to remain anonymous.
+Once the survey responses have been collected, I will store the data in a PostgreSQL database. To organize the information efficiently, I plan to use a normalized database design with separate tables for users, movies, and ratings. This structure will allow me to demonstrate the use of primary keys, foreign keys, and many-to-many relationships.
+After the data has been stored in the database, I will connect to it from R and load it into a dataframe for analysis. Using R and packages such as dplyr and ggplot2, I will summarize the ratings, calculate average scores for each movie, and create visualizations to identify which movies were rated the highest and lowest by participants. Finally, I will discuss any trends or patterns observed in the data and summarize my findings.
+
+## Anticipated Challenges
+
+One challenge I anticipate is setting up and configuring PostgreSQL, since I have limited experience working with SQL databases. To address this challenge, I plan to review PostgreSQL documentation and online tutorials to understand better how to create databases, tables, and relationships between them.
+Another challenge may be collecting complete survey responses. Not every participant will have seen every movie, resulting in missing ratings. I plan to handle this by storing missing values as NULL in the database and excluding them from average rating calculations during analysis.
+A final challenge may be connecting the SQL database to R and ensuring the data is imported correctly. This project will require me to expand my knowledge of SQL and R, particularly in database management, data retrieval, and data visualization. By completing this project, I expect to gain a better understanding of how relational databases and data analysis tools can work together.
+
+```{r import library}
+con <- dbConnect(
+  RPostgres::Postgres(),
+ dbname = "LDATA607",
+ host = "localhost",
+ port = 5433,
+ user = "postgres",
+ 
+)
+```
+
+```{r calling all the tables }
+users_df<-dbGetQuery(con,
+                     "select * from users")
+
+movies_df <-dbGetQuery(con,"select * from movies;")
+
+
+```
+
+
+
+
+```{r running select }
+ratings_df<- dbGetQuery(con,
+"SELECT
+  u.users_name,
+  m.movie_title,
+  r.rating
+FROM ratings r
+JOIN users u
+  ON r.user_id = u.users_id
+JOIN movies m
+  ON r.movies_id = m.movies_id
+ORDER BY u.users_name, m.movie_title;")
+
+head(ratings_df)
+
+```
+
+
+```{r}
+movie_summary <- ratings_df %>%
+ group_by(movie_title) %>%
+ summarize(
+  avg_rating = mean(rating),
+  num_ratings = n()
+ )
+
+movie_summary
+```
+
+
+
+
+
+```{r}
+ggplot(movie_summary,
+    aes(x = reorder(movie_title, avg_rating),
+      y = avg_rating)) +
+ geom_col(fill = "steelblue") +
+ coord_flip() +
+ labs(
+  title = "Average Movie Ratings",
+  x = "Movie",
+  y = "Average Rating"
+ )
+```
+
+

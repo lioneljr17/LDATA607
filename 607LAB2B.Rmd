@@ -1,0 +1,28 @@
+---
+title: "DATA 607 assignment 2B:Classification Metrics"
+author: "Lionel jr. desroses"
+output: html_document
+editor: visual
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    code-tools: true
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+date: "2026-09-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+For this project, I plan to focus on evaluating the performance of a binary classification model using a dataset of penguin observations. The goal is to use the model to predict whether a penguin belongs to the female class. Instead of relying only on the model's predicted class labels, I plan to analyze the predicted probabilities and examine how different probability thresholds affect the model's decisions.
+My approach will begin by exploring the dataset to better understand the distribution of the target variable (sex) and determine whether the classes are balanced. I will also calculate the null error rate to establish a baseline for model performance. Next, I will create new class predictions using probability thresholds of 0.2, 0.5, and 0.8. For each threshold, I will build a confusion matrix to identify true positives, false positives, true negatives, and false negatives. Using these values, I will calculate accuracy, precision, recall, and F1 score. Comparing these results will help illustrate how threshold selection influences classification performance and the tradeoff between false positives and false negatives.
+One challenge I anticipate is interpreting the relationship between predicted probabilities and predicted classes. Another challenge may be understanding the tradeoffs among different evaluation metrics
