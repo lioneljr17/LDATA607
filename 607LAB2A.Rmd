@@ -57,6 +57,7 @@ users_df<-dbGetQuery(con,
 movies_df <-dbGetQuery(con,"select * from movies;")
 
 
+
 ```
 
 
@@ -75,7 +76,16 @@ JOIN movies m
   ON r.movies_id = m.movies_id
 ORDER BY u.users_name, m.movie_title;")
 
+
+ratings_df <- ratings_df %>%
+ mutate(
+  rating_status = ifelse(is.na(rating),
+              "Not Seen",
+              as.character(rating))
+ )
+
 head(ratings_df)
+
 
 ```
 
@@ -84,7 +94,7 @@ head(ratings_df)
 movie_summary <- ratings_df %>%
  group_by(movie_title) %>%
  summarize(
-  avg_rating = mean(rating),
+  avg_rating = mean(rating,na.rm=TRUE),
   num_ratings = n()
  )
 
@@ -92,8 +102,26 @@ movie_summary
 ```
 
 
+```{r not seen table}
+not_seen_summary <- ratings_df%>%
+  group_by(movie_title) %>%
+  summarize(
+    not_seen = sum(is.na(rating))
+  )
+not_seen_summary
+```
 
-
+```{r ratings }
+movie_summary_wna <- ratings_df %>%
+ group_by(movie_title) %>%
+ summarize(
+  avg_rating = mean(rating,na.rm=TRUE),
+  rating_received = sum(!is.na(rating)),
+  num_ratings = n(),
+  not_seen = sum(is.na(rating))
+ )
+movie_summary_wna
+```
 
 ```{r}
 ggplot(movie_summary,
@@ -108,4 +136,19 @@ ggplot(movie_summary,
  )
 ```
 
+
+
+```{r}
+ggplot(movie_summary_wna,
+    aes(x = reorder(movie_title, not_seen),
+      y = not_seen)) +
+ geom_col(fill = "tomato") +
+ coord_flip() +
+ labs(
+  title = "Number of Participants Who Have Not Seen Each Movie",
+  x = "Movie",
+  y = "Not Seen Count"
+ ) +
+ theme_minimal()
+```
 
