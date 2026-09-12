@@ -1,0 +1,206 @@
+---
+title: "DATA 607 assignment 2A:SQL and R"
+author: "Lionel jr. desroses"
+output: html_document
+editor: visual
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    code-tools: true
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+date: "2026-09-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(DBI)
+library(RPostgres)
+```
+
+## Introduction
+
+
+
+For this project, I will create a small movie ratings database that collects ratings from at least 5 participants for 6 recent popular movies. To gather the data, I plan to use either a Microsoft Form or a Google Form, in which participants can provide their ratings on a scale from 1 to 5, with 1 representing "strongly dislike" and 5 representing "strongly like." Participants will also have the option to use a nickname instead of their real name if they prefer to remain anonymous.
+Once the survey responses have been collected, I will store the data in a PostgreSQL database. To organize the information efficiently, I plan to use a normalized database design with separate tables for users, movies, and ratings. This structure will allow me to demonstrate the use of primary keys, foreign keys, and many-to-many relationships.
+After the data has been stored in the database, I will connect to it from R and load it into a dataframe for analysis. Using R and packages such as dplyr and ggplot2, I will summarize the ratings, calculate average scores for each movie, and create visualizations to identify which movies were rated the highest and lowest by participants. Finally, I will discuss any trends or patterns observed in the data and summarize my findings.
+
+
+
+One challenge I anticipate is setting up and configuring PostgreSQL, since I have limited experience working with SQL databases. To address this challenge, I plan to review PostgreSQL documentation and online tutorials to understand better how to create databases, tables, and relationships between them.
+Another challenge may be collecting complete survey responses. Not every participant will have seen every movie, resulting in missing ratings. I plan to handle this by storing missing values as NULL in the database and excluding them from average rating calculations during analysis.
+A final challenge may be connecting the SQL database to R and ensuring the data is imported correctly. This project will require me to expand my knowledge of SQL and R, particularly in database management, data retrieval, and data visualization. By completing this project, I expect to gain a better understanding of how relational databases and data analysis tools can work together.
+
+```{r import library}
+con <- dbConnect(
+  RPostgres::Postgres(),
+ dbname = "LDATA607",
+ host = "localhost",
+ port = 5433,
+ user = "postgres",
+ 
+)
+```
+
+## postgresSQL database creation and data population
+
+In this section, I manaully created the table in postgres also manually insert all the data in the table. for the users table and rating table i collected the data from each user persinally and after collecting the data I insert them manually 
+
+```{SQL}
+--create table users(users_id Serial PRIMARY KEY, users_name VARCHAR(50)NOT NULL);
+
+--create table movies (movies_id serial primary key, movie_title varchar(100)not null, genres varchar(50), release_year integer);
+
+--create table ratings (rating_id serial primary key, user_id integer not null,movies_id integer not null, rating integer check (rating between 1 and 5), constraint fk_user FOREIGN key(user_id)references users(users_id),constraint fk_movie FOREIGN key(movies_id)references movies(movies_id))  
+
+--select * from users;
+
+--insert into movies (movies_id, movie_title,genres,release_year)values(6,'Minions & Monsters','Comedy/Adventure',2026);
+
+--select * from movies;
+
+--insert into users (users_name) VALUES ('MIKE'),('paul'),('zege'),('aly'),('church');
+
+--select * from ratings;
+
+--INSERT INTO ratings (user_id, movies_id, rating)VALUES(1,1,5),(1,2,4),(1,3,5), (2,1,4) ,(2,2,5),(2,5,3),(3,1,5),(3,4,4),(3,6,5),(4,1,5),(4,3,1),(5,1,5),(5,6,5),(6,3,5);
+
+--INSERT INTO ratings (user_id, movies_id, rating) VALUES (1,4,NULL),  (1,5,NULL), (1,6,3),(2,3,NULL), (2,4,NULL), (2,6,NULL),(3,2,NULL), (3,5,NULL),(4,2,NULL),(4,4,NULL),(4,5,2), (4,6,NULL), (5,2,NULL), (5,3,3), (5,4,NULL), (5,5,5),(6,1,5),(6,2,NULL),(6,4,NULL),(6,5,4), (6,6,NULL);
+
+--SELECT
+  u.users_name,
+  m.movie_title,
+  r.rating
+FROM ratings r
+JOIN users u
+  ON r.user_id = u.users_id
+JOIN movies m
+  ON r.movies_id = m.movies_id
+ORDER BY u.users_name, m.movie_title;
+
+
+--select * from ratings;
+
+
+```
+
+## snipping data into R 
+In This section, I am fetching the data from postgres database and making the available in and be able to show up in R markdown, i first sniped the user table and then the movies table after i fetch the data for ratings table. to make sure the rating data is available for the users to see in my github, i create a .cvs file with the information and push everything to my github repository 
+
+```{r calling all the tables }
+
+
+users_df<-dbGetQuery(con,"select * from users")
+users_df
+
+movies_df <-dbGetQuery(con,"select * from movies;")
+movies_df 
+
+ratings_df<- dbGetQuery(con,
+"SELECT
+  u.users_name,
+  m.movie_title,
+  r.rating
+FROM ratings r
+JOIN users u
+  ON r.user_id = u.users_id
+JOIN movies m
+  ON r.movies_id = m.movies_id
+ORDER BY u.users_name, m.movie_title;")
+
+
+ratings_df <- ratings_df %>%
+ mutate(
+  rating_status = ifelse(is.na(rating),
+              "Not Seen",
+              as.character(rating))
+ )
+
+write.csv(
+ ratings_df,
+ "movie_ratings.csv",
+ row.names = FALSE
+)
+
+ratings_df
+
+
+```
+
+## summary
+
+In this section, I created a multiple summary table of the Data that was collected to get a view and a better understanding of the rating of the movies. I created multple summary table because i wanted to be able to have a different table for movie that was not seen and how many of them was not seen. so instead pf chucking everything into one table i createdd a summary table that only collected movie where the rating did not equal to null. so to make sure i was keeping track of the unseen movie i also created a summary table collecting how many use did see the movie. so in that not_seen_summary movie table we only collected data where movies rating column was N/A. and just for funi created a summary table collecting both not seen and with rating.
+```{r}
+movie_summary <- ratings_df %>%
+ group_by(movie_title) %>%
+ summarize(
+  avg_rating = mean(rating,na.rm=TRUE),
+  num_ratings = n()
+ )
+
+movie_summary
+```
+
+
+```{r not seen table}
+not_seen_summary <- ratings_df%>%
+  group_by(movie_title) %>%
+  summarize(
+    not_seen = sum(is.na(rating))
+  )
+not_seen_summary
+```
+
+```{r ratings }
+movie_summary_wna <- ratings_df %>%
+ group_by(movie_title) %>%
+ summarize(
+  avg_rating = mean(rating,na.rm=TRUE),
+  rating_received = sum(!is.na(rating)),
+  num_ratings = n(),
+  not_seen = sum(is.na(rating))
+ )
+movie_summary_wna
+```
+
+## ggplot 
+in this session, i created a two bar graph showing the user the rating movies has receive and how each movie has done. so the movie with highest rating is at the top and the movie with lowest rating is at the bottom. this give a the user a visual presentation on how the movies did over the summer. i also want to incluse a bar graph for the movie not seen, in that way the user can also get a visual presentation on which movies was not seen the most this summer.
+```{r}
+ggplot(movie_summary,
+    aes(x = reorder(movie_title, avg_rating),
+      y = avg_rating)) +
+ geom_col(fill = "steelblue") +
+ coord_flip() +
+ labs(
+  title = "Average Movie Ratings",
+  x = "Movie",
+  y = "Average Rating"
+ )
+```
+
+
+
+```{r}
+ggplot(movie_summary_wna,
+    aes(x = reorder(movie_title, not_seen),
+      y = not_seen)) +
+ geom_col(fill = "tomato") +
+ coord_flip() +
+ labs(
+  title = "Number of Participants Who Have Not Seen Each Movie",
+  x = "Movie",
+  y = "Not Seen Count"
+ ) +
+ theme_minimal()
+```
+
+## conclusion
+in conclusion, the finding of this project demonstrates how Postgres and R can be used together to collect, store and analyzes data. 

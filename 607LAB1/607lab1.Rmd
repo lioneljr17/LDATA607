@@ -1,0 +1,95 @@
+---
+title: "DATA 607 assignment 1:Loading Data into a Data Frame"
+author: "Lionel jr. desroses"
+output: html_document
+date: "2026-09-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#install.packages("tidyverse")
+library(tidyverse)
+```
+
+## Introduction
+
+This project examines the relationship between educational attainment and income levels in the United States. The analysis uses wage data categorized by educational attainment and prepare the data for future comparisons with graduation and educational attainment datasets, to investigate whether higher levels of education are associated with higher earnings. The analysis will also consider differences across demographic groups, including gender and race, to explore whether the relationship between education and income varies across populations.
+
+The project successfully retrieved wage data from a publicly accessible dataset and I transformed the dataset into multiple data frames to facilitate analysis. I organized the data according to key demographic and educational variables, including education level, gender, and race. This structure will support subsequent analysis and visualization while allowing for comparisons of income patterns across educational and demographic groups.
+
+
+### Data Source:
+https://www.kaggle.com/datasets/asaniczka/wages-by-education-in-the-usa-1973-2022/data
+
+### GitHub repository data Raw source:
+  https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/wage_by_edu.csv
+  
+
+```{r wages_by_edu}
+library(readr)
+wage_by_edu <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/wage_by_edu.csv")
+names(wage_by_edu)
+
+```
+
+## Data Tranformation
+The first step in the analysis was to load the wage dataset from a publicly accessible website into my GitHub Repository, which was successful. After reviewing the availability variables, I selected a subset of columns related to educational attainment. The select columns were renamed to improve readability and to make the Dataset easier to interpret.
+
+``` {r framing Data-wage_by_LevelOfEdu }
+wage_by_LevelOfEdu <- wage_by_edu%>%
+  select(year,less_than_hs,high_school,some_college,bachelors_degree,advanced_degree)%>%
+  rename (Year =year, No_Diploma=less_than_hs,High_school_diploma=high_school, Some_college=some_college, Bachelors_Degree =bachelors_degree, Graduate_School=advanced_degree)
+
+head (wage_by_LevelOfEdu)
+summary(wage_by_LevelOfEdu)
+
+```
+
+## Additional Data Frames
+To help support future analysis, another subset of columns related to educational attainment by gender and racial demographic groups. These transformed Datasets allow for more focused comparisons of wage trends across different populations while maintaining the original data structure.
+
+```{r framing Data-wage_by_LevelOfEdu_gender}
+wage_by_LevelOfEdu_gender <- wage_by_edu%>%
+  select (year,men_less_than_hs,men_high_school,men_some_college,men_bachelors_degree,men_advanced_degree,women_less_than_hs,women_high_school,women_some_college,women_bachelors_degree,women_advanced_degree)
+
+head (wage_by_LevelOfEdu_gender)
+summary(wage_by_LevelOfEdu_gender)
+
+```
+
+```{r framing Data -wage_by_LevelOfEdu_race}
+wage_by_LevelOfEdu_race <- wage_by_edu%>%
+  select (year,white_less_than_hs,white_high_school,white_some_college,white_bachelors_degree,white_advanced_degree,black_less_than_hs,black_high_school,black_some_college,black_bachelors_degree,black_advanced_degree,hispanic_less_than_hs,hispanic_high_school,hispanic_some_college,hispanic_bachelors_degree,hispanic_advanced_degree)
+
+head (wage_by_LevelOfEdu_race)
+summary(wage_by_LevelOfEdu_race)
+
+```
+
+```{r trying out graph}
+#plot(wage_by_edu)
+ggplot()+ geom_line(data = wage_by_edu, aes(x = year, y = less_than_hs,color ="Less Than High School")) + 
+  geom_line(data= wage_by_edu,aes(x = year, y = high_school, color="High School"))+
+  geom_line(data= wage_by_edu,aes(x = year, y = some_college, color="Some College"))+
+  geom_line(data= wage_by_edu, aes(x = year, y =bachelors_degree, color ="Bachelor's Degree")) +
+  geom_line(data= wage_by_edu,aes(x = year, y =advanced_degree,color ="Advanced Degree"))+ 
+  labs(title ="Average Wages By Education level",x ="Year",y="Average wages(USD)", color ="Education Level")+
+   scale_color_manual(values = c(
+     "Less Than High School" = 'black',
+      "High School" = 'red',
+      "Some College" = 'blue',
+      "Bachelor's Degree" = 'green',
+      "Advanced Degree"='orange'
+    )
+  ) +theme_minimal()
+
+
+```
+
+
+
+## Conclusion
+
+   I was successfully able to retrieve the wage dataset from a publicly accessible GitHub repository and transform it into several structured data frames organized by education level, gender, and race. Relevant variables were selected, renamed, and reformatted to create a cleaner and more interpretable dataset for analysis. The visualization of average wages by educational attainment shows a positive association between education and earnings, with individuals holding bachelor’s and advanced degrees generally reporting higher average wages than those with lower levels of education. While these findings provide preliminary evidence of a relationship between educational attainment and income, the current analysis does not establish a causal relationship. Future analysis could integrate graduation and educational attainment statistics with wage data to further examine how educational achievement is associated with income across gender and racial groups and how these patterns have changed over time.
+
+
