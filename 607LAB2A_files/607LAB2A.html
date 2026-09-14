@@ -359,40 +359,19 @@ display: none;
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>For this project, I will create a small movie ratings database that
-collects ratings from at least 5 participants for 6 recent popular
-movies. To gather the data, I plan to use either a Microsoft Form or a
-Google Form, in which participants can provide their ratings on a scale
-from 1 to 5, with 1 representing “strongly dislike” and 5 representing
-“strongly like.” Participants will also have the option to use a
-nickname instead of their real name if they prefer to remain anonymous.
-Once the survey responses have been collected, I will store the data in
-a PostgreSQL database. To organize the information efficiently, I plan
-to use a normalized database design with separate tables for users,
-movies, and ratings. This structure will allow me to demonstrate the use
-of primary keys, foreign keys, and many-to-many relationships. After the
-data has been stored in the database, I will connect to it from R and
-load it into a dataframe for analysis. Using R and packages such as
-dplyr and ggplot2, I will summarize the ratings, calculate average
-scores for each movie, and create visualizations to identify which
-movies were rated the highest and lowest by participants. Finally, I
-will discuss any trends or patterns observed in the data and summarize
-my findings.</p>
-<p>One challenge I anticipate is setting up and configuring PostgreSQL,
-since I have limited experience working with SQL databases. To address
-this challenge, I plan to review PostgreSQL documentation and online
-tutorials to understand better how to create databases, tables, and
-relationships between them. Another challenge may be collecting complete
-survey responses. Not every participant will have seen every movie,
-resulting in missing ratings. I plan to handle this by storing missing
-values as NULL in the database and excluding them from average rating
-calculations during analysis. A final challenge may be connecting the
-SQL database to R and ensuring the data is imported correctly. This
-project will require me to expand my knowledge of SQL and R,
-particularly in database management, data retrieval, and data
-visualization. By completing this project, I expect to gain a better
-understanding of how relational databases and data analysis tools can
-work together.</p>
+<p>The purpose of this project is to collect and analyze movie ratings
+using a PostgreSQL database and R. Six recent movies were selected. Six
+participants were asked to rate each movie they had seen on a scale from
+1 to 5, where 1 represents “strongly dislike” and 5 represents “strongly
+like.” The collected ratings were stored in a normalized PostgreSQL
+database consisting of three tables: users, movies, and ratings. This
+design demonstrates the use of primary keys, foreign keys, and
+many-to-many relationships. After the data was stored in PostgreSQL, it
+was imported into R for analysis. Using packages such as dplyr and
+ggplot2, summary statistics and visualizations were created to identify
+trends in movie ratings and movie popularity. Missing ratings were
+treated as movies that participants had not seen and were tracked
+separately during the analysis.</p>
 <pre class="r"><code>con &lt;- dbConnect(
   RPostgres::Postgres(),
  dbname = &quot;LDATA607&quot;,
@@ -402,12 +381,16 @@ work together.</p>
  
 )</code></pre>
 </div>
-<div id="postgressql-database-creation-and-data-population" class="section level2">
-<h2>postgresSQL database creation and data population</h2>
-<p>In this section, I manaully created the table in postgres also
-manually insert all the data in the table. for the users table and
-rating table i collected the data from each user persinally and after
-collecting the data I insert them manually</p>
+<div id="postgresql-database-creation-and-data-population" class="section level2">
+<h2>postgreSQL database creation and data population</h2>
+<p>The database for this project was created manually in PostgreSQL.
+Three tables were created: users, movies, and ratings. The users table
+stores participant information, the movies table stores movie
+information, and the ratings table stores individual movie ratings.Data
+was collected directly from six participants and entered into the
+database manually. The ratings table links users and movies through
+foreign key relationships, allowing each user to rate multiple movies
+and each movie to receive ratings from multiple users.</p>
 <pre class="sql"><code>--create table users(users_id Serial PRIMARY KEY, users_name VARCHAR(50)NOT NULL);
 
 --create table movies (movies_id serial primary key, movie_title varchar(100)not null, genres varchar(50), release_year integer);
@@ -443,14 +426,16 @@ ORDER BY u.users_name, m.movie_title;
 --select * from ratings;
 </code></pre>
 </div>
-<div id="snipping-data-into-r" class="section level2">
-<h2>snipping data into R</h2>
-<p>In This section, I am fetching the data from postgres database and
-making the available in and be able to show up in R markdown, i first
-sniped the user table and then the movies table after i fetch the data
-for ratings table. to make sure the rating data is available for the
-users to see in my github, i create a .cvs file with the information and
-push everything to my github repository</p>
+<div id="importing-data-into-r" class="section level2">
+<h2>importing data into R</h2>
+<p>In this section, the data stored in PostgreSQL is imported into R
+using the RPostgres package. Separate queries were used to retrieve the
+users, movies, and ratings tables. The ratings data was joined with the
+users and movies tables to create a single dataframe for analysis.
+Missing ratings were converted into a “Not Seen” category to better
+represent movies that participants had not watched. To improve
+reproducibility, the final dataframe was exported to a CSV file and
+included in the GitHub repository.</p>
 <pre class="r"><code>users_df&lt;-dbGetQuery(con,&quot;select * from users&quot;)
 users_df</code></pre>
 <pre><code>##   users_id users_name
@@ -554,19 +539,17 @@ ratings_df</code></pre>
 ## 55       zege The Super Mario Galaxy Movie     NA      Not Seen
 ## 56       zege                  Toy Story 5      1             1</code></pre>
 </div>
-<div id="summary" class="section level2">
-<h2>summary</h2>
+<div id="summary-statistic" class="section level2">
+<h2>Summary Statistic</h2>
 <p>In this section, I created a multiple summary table of the Data that
 was collected to get a view and a better understanding of the rating of
-the movies. I created multple summary table because i wanted to be able
-to have a different table for movie that was not seen and how many of
-them was not seen. so instead pf chucking everything into one table i
-createdd a summary table that only collected movie where the rating did
-not equal to null. so to make sure i was keeping track of the unseen
-movie i also created a summary table collecting how many use did see the
-movie. so in that not_seen_summary movie table we only collected data
-where movies rating column was N/A. and just for funi created a summary
-table collecting both not seen and with rating.</p>
+the movies. The first summary table calculates the average rating for
+each movie. The second summary table counts the number of participants
+who had not seen each movie. Finally, a combined summary table was
+created to show average ratings, the number of ratings received, and the
+number of “Not Seen” responses for each movie. These summaries provide a
+clearer understanding of both movie popularity and movie exposure among
+participants.</p>
 <pre class="r"><code>movie_summary &lt;- ratings_df %&gt;%
  group_by(movie_title) %&gt;%
  summarize(
@@ -618,15 +601,15 @@ movie_summary_wna</code></pre>
 ## 5 Toy Story 5                        3.4                5           7        2
 ## 6 spider man brand new day           4.86               7           7        0</code></pre>
 </div>
-<div id="ggplot" class="section level2">
-<h2>ggplot</h2>
-<p>in this session, i created a two bar graph showing the user the
-rating movies has receive and how each movie has done. so the movie with
-highest rating is at the top and the movie with lowest rating is at the
-bottom. this give a the user a visual presentation on how the movies did
-over the summer. i also want to incluse a bar graph for the movie not
-seen, in that way the user can also get a visual presentation on which
-movies was not seen the most this summer.</p>
+<div id="data-visualizations" class="section level2">
+<h2>Data Visualizations</h2>
+<p>in this session, Two visualizations were created using ggplot2. The
+first chart displays the average rating received by each movie. This
+visualization makes it easy to compare overall movie performance and
+identify the highest-rated movies. The second chart displays the number
+of participants who had not seen each movie. This provides additional
+insight into movie familiarity and helps explain differences in the
+number of ratings received for each movie.</p>
 <pre class="r"><code>ggplot(movie_summary,
     aes(x = reorder(movie_title, avg_rating),
       y = avg_rating)) +
@@ -653,8 +636,18 @@ movies was not seen the most this summer.</p>
 </div>
 <div id="conclusion" class="section level2">
 <h2>conclusion</h2>
-<p>in conclusion, the finding of this project demonstrates how Postgres
-and R can be used together to collect, store and analyzes data.</p>
+<p>in conclusion, This project demonstrated how PostgreSQL and R can be
+used together to collect, store, analyze, and visualize data. A
+normalized database structure was created using separate users, movies,
+and ratings tables. The data was then imported into R, where summary
+statistics and visualizations were generated to evaluate movie ratings
+and identify viewing trends among participants. One challenge addressed
+during the project was handling missing ratings. Movies that
+participants had not seen were stored as NULL values in PostgreSQL and
+tracked as “Not Seen” responses in R. This approach allowed missing data
+to be incorporated into the analysis without affecting average rating
+calculations.</p>
+<pre class="r"><code>dbDisconnect(con)</code></pre>
 </div>
 
 
