@@ -360,25 +360,29 @@ Metrics</h1>
 
 <div id="introduction" class="section level2">
 <h2>Introduction</h2>
-<p>For this project, I plan to focus on evaluating the performance of a
-binary classification model using a dataset of penguin observations. The
-goal is to use the model to predict whether a penguin belongs to the
-female class. Instead of relying only on the model’s predicted class
-labels, I plan to analyze the predicted probabilities and examine how
-different probability thresholds affect the model’s decisions. My
-approach will begin by exploring the dataset to better understand the
-distribution of the target variable (sex) and determine whether the
-classes are balanced. I will also calculate the null error rate to
-establish a baseline for model performance. Next, I will create new
-class predictions using probability thresholds of 0.2, 0.5, and 0.8. For
-each threshold, I will build a confusion matrix to identify true
-positives, false positives, true negatives, and false negatives. Using
-these values, I will calculate accuracy, precision, recall, and F1
-score. Comparing these results will help illustrate how threshold
-selection influences classification performance and the tradeoff between
-false positives and false negatives.</p>
-<p>##load library and data In this section I am loading the data into R
-so i could be able to read it in my Rm and be able to modified it.</p>
+<p>This project evaluates the performance of a binary classification
+model on a dataset of penguin observations. The model predicts the
+probability that a penguin belongs to the female class. Rather than
+relying solely on predicted class labels, this analysis examines how
+different probability thresholds affect classification decisions. The
+analysis begins by exploring the dataset to understand the distribution
+of the target variable (sex) and determine whether the classes are
+balanced. A null error rate is then calculated to establish a baseline
+level of performance. Next, new class predictions are generated using
+probability thresholds of 0.2, 0.5, and 0.8. For each threshold, a
+confusion matrix is created to identify true positives, false positives,
+true negatives, and false negatives. These values are then used to
+calculate accuracy, precision, recall, and F1 score. Comparing the
+results across thresholds provides insight into the tradeoff between
+correctly identifying positive cases and minimizing classification
+errors.</p>
+</div>
+<div id="load-library-and-data" class="section level2">
+<h2>load library and data</h2>
+<p>In this section, the required libraries are loaded, and the penguin
+prediction dataset is imported into R. Loading the dataset allows the
+observations and model predictions to be examined and prepared for
+analysis.</p>
 <pre class="r"><code>library(readr)
 penguin_predictions &lt;- read_csv(&quot;https://raw.githubusercontent.com/acatlin/data/refs/heads/master/penguin_predictions.csv&quot;)</code></pre>
 <pre><code>## Rows: 93 Columns: 3
@@ -403,12 +407,14 @@ head((penguin_predictions))</code></pre>
 </div>
 <div id="exploratory-data-analysis" class="section level2">
 <h2>Exploratory Data Analysis</h2>
-<p>in this section, we are calling on the count function to count how
-many female and male we have in the sex column, we also created a visual
-graph to see the difference. by doing this we get to see if the classes
-are balances, as the data show they are not. based on the data we notice
-that we have more male than female in the dataset, and that male are the
-majority in the table</p>
+<p>This exploratory analysis is to understand the distribution of the
+target variable (sex). By counting the number of male and female
+observations and visualizing the results with a bar chart, it becomes
+easier to identify whether the classes are balanced. The results show
+that the dataset contains more male penguins than female penguins,
+indicating a slight class imbalance. Understanding class distribution is
+important because it can influence how classification models and
+performance metrics should be interpreted.</p>
 <pre class="r"><code>count (penguin_predictions,sex)</code></pre>
 <pre><code>## # A tibble: 2 × 2
 ##   sex        n
@@ -427,9 +433,12 @@ majority in the table</p>
 </div>
 <div id="null-error-rate" class="section level2">
 <h2>Null Error Rate</h2>
-<p>In this section we are calculate the null error rate, the null error
-rate is usually represent the error produced by the model. this provide
-a baseline that our clasification model should outperform</p>
+<p>The null error rate represents the error produced by a model that
+always predicts the majority class. Since male penguins represent the
+majority class in this dataset, a null model would classify every
+observation as male. This metric provides a baseline for evaluating
+model performance, as any useful classification model should outperform
+a simple majority-class prediction.</p>
 <pre class="r"><code>table (penguin_predictions$sex)</code></pre>
 <pre><code>## 
 ## female   male 
@@ -439,8 +448,12 @@ a baseline that our clasification model should outperform</p>
 </div>
 <div id="confusion-matrices" class="section level2">
 <h2>Confusion Matrices</h2>
-<p>in this section we created a prediction colunm at each this
-threshhold</p>
+<p>In this section, new predicted class labels are generated using
+probability thresholds of 0.2, 0.5, and 0.8. Adjusting the threshold
+changes how confident the model must be before classifying an
+observation as female. Lower thresholds tend to classify more
+observations as female, while higher thresholds require greater
+confidence and produce fewer positive classifications.</p>
 <pre class="r"><code>#threshhold (0.2,0.5,0.8)
 penguin_predictions &lt;- penguin_predictions %&gt;% 
   mutate(pred_02 = ifelse(.pred_female&gt;0.2, &quot;female&quot;,&quot;male&quot;),
@@ -475,10 +488,11 @@ head(penguin_predictions)</code></pre>
 </div>
 <div id="treshold_0.2" class="section level1">
 <h1>Treshold_0.2</h1>
-<p>in this section, we started assigning the, TP,FP,TN,FN for treshhold
-0.2. At the 0.2 threshold, the model correctly identified 37 female
-penguins and 48 male penguins. The model produced 6 false positives and
-2 false negatives.</p>
+<p>At the 0.2 threshold, the model correctly classified 37 female
+penguins and 48 male penguins. However, it also produced 6 false
+positives and 2 false negatives. Because this threshold is relatively
+low, the model is more likely to classify observations as female,
+resulting in higher recall but also more false-positive predictions.</p>
 <pre class="r"><code>table(
   Actual= penguin_predictions$sex,
   predicted = penguin_predictions$pred_02
@@ -519,10 +533,11 @@ metrics_02</code></pre>
 </div>
 <div id="treshold_0.5" class="section level1">
 <h1>Treshold_0.5</h1>
-<p>in this section, we started assigning the, TP,FP,TN,FN for treshhold
-0.5,At the 0.5 threshold, the model correctly identified 36 female
-penguins and 51 male penguins. The number of false positives decreased
-to 3 while false negatives increased slightly to 3.</p>
+<p>At the 0.5 threshold, the model correctly identified 36 female
+penguins and 51 male penguins. Compared to the 0.2 threshold, the number
+of false positives decreased from 6 to 3, while false negatives
+increased slightly from 2 to 3. This threshold provides a more balanced
+tradeoff between precision and recall.</p>
 <pre class="r"><code>table(
   Actual= penguin_predictions$sex,
   predicted = penguin_predictions$pred_05
@@ -562,10 +577,11 @@ metrics_05</code></pre>
 </div>
 <div id="treshold_0.8" class="section level1">
 <h1>Treshold_0.8</h1>
-<p>in this section, we started assigning the, TP,FP,TN,FN for treshhold
-0.8, At the 0.8 threshold, the model produced the fewest false positives
+<p>At the 0.8 threshold, the model produced the fewest false positives
 (2) while maintaining the same number of false negatives as the 0.5
-threshold.</p>
+threshold. This indicates that the model became more selective when
+predicting the female class, leading to improved precision and overall
+accuracy.</p>
 <pre class="r"><code>table(
   Actual= penguin_predictions$sex,
   predicted = penguin_predictions$pred_08
@@ -629,24 +645,32 @@ metrics</code></pre>
 </div>
 <div id="real-world-use-cases" class="section level2">
 <h2>Real-World Use Cases</h2>
-<p>Threshold 0.2 A low threshold may be preferred in medical screening
-applications where missing a positive case could have serious
-consequences. In this situation, maximizing recall is more important
-than minimizing false positives. Threshold 0.8 A high threshold may be
-preferred in spam filtering or financial approval systems where false
-positives are costly. In these cases, higher precision is desirable even
-if some positive cases are missed.</p>
+<p>Threshold 0.2. A threshold of 0.2 may be preferred in medical
+screening applications where missing a positive case could have serious
+consequences. For example, when screening for a disease, it is often
+more important to identify as many potentially positive cases as
+possible, even if some false positives occur. In these situations,
+maximizing recall is typically more important than maximizing
+precision.</p>
+<p>Threshold 0.8. A threshold of 0.8 may be preferred in applications
+where false positives are costly. Examples include spam filtering, loan
+approvals, or fraud investigations. In these situations, organizations
+may prefer to act only when the model is highly confident, prioritizing
+precision over recall.</p>
 </div>
 <div id="conclusion" class="section level2">
 <h2>Conclusion</h2>
-<p>This project evaluated a binary classification model using different
-probability thresholds. The null error rate provided a baseline for
-comparison, while confusion matrices and performance metrics
-demonstrated how threshold selection affects model performance. The
-results showed that lower thresholds generally improve recall, while
-higher thresholds improve precision. The analysis highlights the
-importance of selecting an appropriate threshold based on the goals and
-requirements of a specific application.</p>
+<p>This project evaluated the performance of a binary classification
+model using different probability thresholds. The null error rate
+established a baseline for comparison, while confusion matrices and
+performance metrics provided insight into how threshold selection
+influences model behavior. The results showed that lower thresholds
+generally improve recall by identifying more positive cases, whereas
+higher thresholds improve precision by reducing false positive
+predictions. Overall, the analysis demonstrates that there is no
+universally optimal threshold. Instead, the most appropriate threshold
+depends on the specific objectives of the problem and the relative costs
+of false positives and false negatives.</p>
 </div>
 </div>
 
