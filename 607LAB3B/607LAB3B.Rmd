@@ -1,0 +1,32 @@
+---
+title: "DATA 607 assignment 3A:Window Functions"
+author: "Lionel jr. desroses"
+output: html_document
+editor: visual
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    code-tools: true
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+date: "2026-09-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+```
+
+## Introduction
+# Planned Approach
+
+For this assignment, I plan to use a time-series dataset containing daily prices for multiple stocks. The dataset will include a date column, an item identifier, and a numerical value representing the daily closing price.My approach will be to first clean and organize the data so that observations for each item are ordered chronologically. Once the data is properly structured, I will use window functions to calculate two metrics for each item: Year-to-Date (YTD) Average and  Six-Day Moving Average. I will compare the original values, YTD averages, and moving averages to observe how averaging's smoothing effect changes the data's trends.
+Anticipated Data Challenges
+a challenges That may arise during this analysis. is some datasets may contain missing dates due to weekends, holidays, or unavailable observations. This could affect moving average calculations if the data is not sorted correctly.
