@@ -1,0 +1,35 @@
+---
+title: "DATA 607 assignment 3A:Global Baseline Estimate"
+author: "Lionel jr. desroses"
+output: html_document
+editor: visual
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    code-tools: true
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+date: "2026-09-05"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+```
+
+## Introduction
+# Planned Approach
+
+For this project, I will use the movie ratings data collected in the previous assignment (LAB2A) to build a simple recommendation system using the Global Baseline Estimate (GBE) algorithm. The dataset consists of ratings from multiple users who rated several recent movies on a scale from 1 to 5. Because not every participant rated every movie, the dataset contains missing values that represent movies a user has not seen.
+To tackle this problem, I will first import the movie ratings data into R and organize it into a user-movie ratings matrix. Next, I will calculate the global average rating across all movies and users. After determining the global average, I will calculate user-specific biases and movie-specific biases. User bias measures whether a user generally rates movies higher or lower than average, while movie bias measures whether a movie tends to receive higher or lower ratings than average.Using these values, I will implement the Global Baseline Estimate algorithm to predict ratings for movies that users have not yet seen. The predicted ratings will then be used to generate recommendations. For each user, the movie with the highest predicted rating among the unseen movies will be identified as the recommended movie.
+Finally, I will evaluate the results and discuss whether the recommendations appear reasonable based on the users' existing rating patterns. I will also summarize the strengths and limitations of using a non-personalized recommendation algorithm such as Global Baseline Estimates.
+Anticipated Challenges
+
+One challenge I anticipate is handling missing ratings. Since users have not rated every movie, the dataset is incomplete. These missing values are necessary for the recommendation process because they represent the movies for which predictions must be generated. Care must be taken to distinguish between an actual rating and a missing value.Another challenge is evaluating the quality of the recommendations. Because the dataset is relatively small and contains ratings from only a few users, the recommendations may be influenced heavily by individual ratings.
