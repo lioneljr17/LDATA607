@@ -15,13 +15,14 @@ format:
     df-print: paged
     smooth-scroll: true
     embed-resources: true
-date: "2026-09-05"
+date: "2026-09-17"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(dplyr)
+library(tidyr)
 ```
 
 ## Introduction
@@ -33,3 +34,54 @@ Finally, I will evaluate the results and discuss whether the recommendations app
 Anticipated Challenges
 
 One challenge I anticipate is handling missing ratings. Since users have not rated every movie, the dataset is incomplete. These missing values are necessary for the recommendation process because they represent the movies for which predictions must be generated. Care must be taken to distinguish between an actual rating and a missing value.Another challenge is evaluating the quality of the recommendations. Because the dataset is relatively small and contains ratings from only a few users, the recommendations may be influenced heavily by individual ratings.
+
+```{r importing the movie_rating }
+
+library(readr)
+movie_ratings <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607LAB2A_files/movie_ratings.csv")
+
+movies_ratings_withoutdup<- movie_ratings%>% 
+  distinct(users_name,movie_title,.keep_all = TRUE)
+
+View(movie_ratings)
+head((movie_ratings))
+
+
+Movie_Rating_view <- movie_ratings %>%
+  select (users_name, movie_title, rating)%>%
+  distinct() %>%
+  pivot_wider (names_from =movie_title, values_from = rating)
+
+head(Movie_Rating_view)
+
+
+```
+
+```{r global average }
+global_avrg<- mean (movies_ratings_withoutdup$rating,na.rm = TRUE)
+
+global_avrg
+```
+
+```{r uses avrg}
+Movie_Rating_view$uses_avrg <- rowMeans(Movie_Rating_view[-1], na.rm = TRUE)
+
+Movie_Rating_view
+```
+```{r user bias}
+Movie_Rating_view$user_bias <- Movie_Rating_view$uses_avrg - global_avrg
+
+Movie_Rating_view
+```
+
+```{r movie avrg}
+
+movie_avrg <- colMeans(Movie_Rating_view[,2:(ncol(Movie_Rating_view))], na.rm = TRUE)
+
+movie_avrg
+```
+```{r movie bias}
+movie_bias <- movie_avrg - global_avrg
+
+movie_bias
+```
