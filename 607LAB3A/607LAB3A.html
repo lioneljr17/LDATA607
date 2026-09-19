@@ -481,6 +481,16 @@ movie_avrg</code></pre>
 ##                     4.000000                     3.500000 
 ##                    uses_avrg                    user_bias 
 ##                     4.125000                    -0.025000</code></pre>
+<pre class="r"><code>movie_avrg_row&lt;- data.frame(users_name =&quot;movie_avrg&quot;, t(movie_avrg), user_avrg =mean(movie_avrg, na.rm = TRUE), use_bias =NA)
+
+movie_avrg_row</code></pre>
+<pre><code>##   users_name Michael Minions...Monsters spider.man.brand.new.day The.Odyssey
+## 1 movie_avrg     3.5           4.333333                 4.833333         4.5
+##   The.Super.Mario.Galaxy.Movie Toy.Story.5 uses_avrg user_bias user_avrg
+## 1                            4         3.5     4.125    -0.025  3.595833
+##   use_bias
+## 1       NA</code></pre>
+<pre class="r"><code>#Movie_Rating_view &lt;- bind_rows(movie_avrg_row)</code></pre>
 <pre class="r"><code>movie_bias &lt;- movie_avrg - global_avrg
 
 movie_bias</code></pre>

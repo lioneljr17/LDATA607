@@ -79,6 +79,12 @@ Movie_Rating_view
 movie_avrg <- colMeans(Movie_Rating_view[,2:(ncol(Movie_Rating_view))], na.rm = TRUE)
 
 movie_avrg
+
+movie_avrg_row<- data.frame(users_name ="movie_avrg", t(movie_avrg), user_avrg =mean(movie_avrg, na.rm = TRUE), use_bias =NA)
+
+movie_avrg_row
+
+#Movie_Rating_view <- bind_rows(movie_avrg_row)
 ```
 ```{r movie bias}
 movie_bias <- movie_avrg - global_avrg
