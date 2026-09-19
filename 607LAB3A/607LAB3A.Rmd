@@ -52,6 +52,9 @@ Movie_Rating_view <- movie_ratings %>%
   distinct() %>%
   pivot_wider (names_from =movie_title, values_from = rating)
 
+names(Movie_Rating_view) <- gsub(" ","_", names(Movie_Rating_view))
+names(Movie_Rating_view) <- gsub("&","and", names(Movie_Rating_view))
+
 head(Movie_Rating_view)
 
 
@@ -64,42 +67,45 @@ global_avrg
 ```
 
 ```{r uses avrg}
-Movie_Rating_view$uses_avrg <- rowMeans(Movie_Rating_view[-1], na.rm = TRUE)
+Movie_Rating_view$users_avrg <- rowMeans(Movie_Rating_view[-1], na.rm = TRUE)
 
 Movie_Rating_view
 ```
 ```{r user bias}
-Movie_Rating_view$user_bias <- Movie_Rating_view$uses_avrg - global_avrg
+Movie_Rating_view$users_bias <- Movie_Rating_view$users_avrg - global_avrg
 
 Movie_Rating_view
 ```
 
 ```{r movie avrg}
 
+#movie_avrg_row <- as.list(rep(NA,ncol(Movie_Rating_view)))
 movie_avrg <- colMeans(Movie_Rating_view[,2:(ncol(Movie_Rating_view))], na.rm = TRUE)
 
 movie_avrg
 
-movie_avrg_row<- data.frame(users_name ="movie_avrg", t(movie_avrg), user_avrg =mean(movie_avrg, na.rm = TRUE), use_bias =NA)
+movie_avrg_row<- data.frame(users_name ="movie_avrg", t(movie_avrg), user_avrg =mean(movie_avrg, na.rm = TRUE), users_bias =NA)
 
 movie_avrg_row
 
 Movie_Rating_view <- bind_rows(Movie_Rating_view,movie_avrg_row)
 
-tail(Movie_Rating_view)
+
 ```
 ```{r movie bias}
-movie_bias <- movie_avrg - global_avrg
+movie_bias <-  movie_avrg - global_avrg
 
 movie_bias
+movie_bias_row<- data.frame(users_name ="movie_avrg -movies mean", t(movie_bias), user_avrg =NA,users_bias =NA)
+
+movie_bias_row
+
+Movie_Rating_view <- bind_rows(Movie_Rating_view,movie_bias_row)
+
 ```
 
 
 ```{r}
-write.csv(
-  Movie_Rating_view,
- "movie_rating_view.csv",
- row.names = FALSE
-)
+names(Movie_Rating_view)
 
 ```
