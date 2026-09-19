@@ -84,10 +84,22 @@ movie_avrg_row<- data.frame(users_name ="movie_avrg", t(movie_avrg), user_avrg =
 
 movie_avrg_row
 
-#Movie_Rating_view <- bind_rows(movie_avrg_row)
+Movie_Rating_view <- bind_rows(Movie_Rating_view,movie_avrg_row)
+
+tail(Movie_Rating_view)
 ```
 ```{r movie bias}
 movie_bias <- movie_avrg - global_avrg
 
 movie_bias
+```
+
+
+```{r}
+write.csv(
+  Movie_Rating_view,
+ "movie_rating_view.csv",
+ row.names = FALSE
+)
+
 ```
