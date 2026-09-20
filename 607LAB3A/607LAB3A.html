@@ -386,15 +386,17 @@ recommendations appear reasonable based on the users’ existing rating
 patterns. I will also summarize the strengths and limitations of using a
 non-personalized recommendation algorithm such as Global Baseline
 Estimates. Anticipated Challenges</p>
-<p>One challenge I anticipate is handling missing ratings. Since users
-have not rated every movie, the dataset is incomplete. These missing
-values are necessary for the recommendation process because they
-represent the movies for which predictions must be generated. Care must
-be taken to distinguish between an actual rating and a missing
-value.Another challenge is evaluating the quality of the
-recommendations. Because the dataset is relatively small and contains
-ratings from only a few users, the recommendations may be influenced
-heavily by individual ratings.</p>
+<div id="importing-and-preparing-the-data" class="section level2">
+<h2>importing and preparing the data</h2>
+<p>in this session, I imported a the data set from the previous
+assignment 2A. The dataset contains user ratings for several recently
+released movies on a scale from 1 to 5. Because not every user rated
+every movie, some ratings are missing.To prepare the data for the Global
+Baseline Estimate algorithm, duplicate records were removed, and the
+dataset was transformed from a long format into a user-movie ratings
+matrix. In this format, each row represents a user, and each column
+represents a movie. Missing values (NA) indicate movies that a user has
+not yet seen.</p>
 <pre class="r"><code>library(readr)
 movie_ratings &lt;- read_csv(&quot;https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607LAB2A_files/movie_ratings.csv&quot;)</code></pre>
 <pre><code>## Rows: 56 Columns: 4
@@ -408,7 +410,7 @@ movie_ratings &lt;- read_csv(&quot;https://raw.githubusercontent.com/lioneljr17/
 <pre class="r"><code>movies_ratings_withoutdup&lt;- movie_ratings%&gt;% 
   distinct(users_name,movie_title,.keep_all = TRUE)
 
-View(movie_ratings)
+#View(movie_ratings)
 head((movie_ratings))</code></pre>
 <pre><code>## # A tibble: 6 × 4
 ##   users_name movie_title              rating rating_status
@@ -438,10 +440,29 @@ head(Movie_Rating_view)</code></pre>
 ## 5 paul            NA                    5                        5          NA
 ## 6 zege             2                   NA                        5          NA
 ## # ℹ 2 more variables: The_Super_Mario_Galaxy_Movie &lt;dbl&gt;, Toy_Story_5 &lt;dbl&gt;</code></pre>
+</div>
+<div id="global-average-calculation" class="section level2">
+<h2>Global Average Calculation</h2>
+<p>in this session I procceed with the step which is to calculate the
+global average rating. This value represents the average rating across
+all users and movies in the dataset.The global average serves as the
+baseline prediction for the recommendation system. All future
+predictions begin with this value and are adjusted using user and movie
+biases.</p>
 <pre class="r"><code>global_avrg&lt;- mean (movies_ratings_withoutdup$rating,na.rm = TRUE)
 
 global_avrg</code></pre>
 <pre><code>## [1] 4.15</code></pre>
+</div>
+<div id="calculating-user-averages-and-user-bias" class="section level2">
+<h2>Calculating User averages and User bias</h2>
+<p>After calculating the global average, the next step is to determine
+how each user typically rates movies. A user average is calculated by
+taking the mean of all ratings provided by a specific user. User bias
+measures whether a user tends to rate movies higher or lower than the
+overall average. A positive user bias indicates that a user generally
+gives higher ratings, while a negative user bias indicates that a user
+tends to rate movies lower than average.</p>
 <pre class="r"><code>Movie_Rating_view$users_avrg &lt;- rowMeans(Movie_Rating_view[-1], na.rm = TRUE)
 
 Movie_Rating_view</code></pre>
@@ -470,8 +491,18 @@ Movie_Rating_view</code></pre>
 ## 6 zege             2                   NA                        5          NA
 ## # ℹ 4 more variables: The_Super_Mario_Galaxy_Movie &lt;dbl&gt;, Toy_Story_5 &lt;dbl&gt;,
 ## #   users_avrg &lt;dbl&gt;, users_bias &lt;dbl&gt;</code></pre>
-<pre class="r"><code>#movie_avrg_row &lt;- as.list(rep(NA,ncol(Movie_Rating_view)))
-movie_avrg &lt;- colMeans(Movie_Rating_view[,2:(ncol(Movie_Rating_view))], na.rm = TRUE)
+</div>
+<div id="calculating-movie-averages-and-movies-bias" class="section level2">
+<h2>Calculating Movie Averages and Movies Bias</h2>
+<p>The recommendation system must also account for differences in movie
+popularity. Some movies tend to receive higher ratings from most users,
+while others receive lower ratings.To capture this effect, a movie
+average is calculated for each movie. Movie bias is then computed by
+subtracting the global average from the movie average. A positive movie
+bias indicates that a movie is generally well-liked, while a negative
+movie bias suggests that the movie receives lower ratings than
+average.</p>
+<pre class="r"><code>movie_avrg &lt;- colMeans(Movie_Rating_view[,2:(ncol(Movie_Rating_view))], na.rm = TRUE)
 
 movie_avrg</code></pre>
 <pre><code>##                      Michael         Minions_and_Monsters 
@@ -484,16 +515,16 @@ movie_avrg</code></pre>
 ##                     4.125000                    -0.025000</code></pre>
 <pre class="r"><code>movie_avrg_row&lt;- data.frame(users_name =&quot;movie_avrg&quot;, t(movie_avrg)) 
                             
-                            #users_avrg =mean(movie_avrg, na.rm = TRUE))
-
-#users_bias =NA
+                          
 movie_avrg_row</code></pre>
 <pre><code>##   users_name Michael Minions_and_Monsters spider_man_brand_new_day The_Odyssey
 ## 1 movie_avrg     3.5             4.333333                 4.833333         4.5
 ##   The_Super_Mario_Galaxy_Movie Toy_Story_5 users_avrg users_bias
 ## 1                            4         3.5      4.125     -0.025</code></pre>
-<pre class="r"><code>Movie_Rating_view &lt;- bind_rows(Movie_Rating_view,movie_avrg_row)</code></pre>
-<pre class="r"><code>movie_bias &lt;-  movie_avrg - global_avrg
+<pre class="r"><code>Movie_Rating_view &lt;- bind_rows(Movie_Rating_view,movie_avrg_row)
+
+
+movie_bias &lt;-  movie_avrg - global_avrg
 
 movie_bias</code></pre>
 <pre><code>##                      Michael         Minions_and_Monsters 
@@ -506,21 +537,28 @@ movie_bias</code></pre>
 ##                   -0.0250000                   -4.1750000</code></pre>
 <pre class="r"><code>movie_bias_row&lt;- data.frame(users_name =&quot;movie_bias&quot;, t(movie_bias))
                             
-                            #user_avrg =NA,users_bias =NA)
-
+                          
 movie_bias_row</code></pre>
 <pre><code>##   users_name Michael Minions_and_Monsters spider_man_brand_new_day The_Odyssey
 ## 1 movie_bias   -0.65            0.1833333                0.6833333        0.35
 ##   The_Super_Mario_Galaxy_Movie Toy_Story_5 users_avrg users_bias
 ## 1                        -0.15       -0.65     -0.025     -4.175</code></pre>
 <pre class="r"><code>Movie_Rating_view &lt;- bind_rows(Movie_Rating_view,movie_bias_row)</code></pre>
+</div>
+<div id="predicting-missing-rate" class="section level2">
+<h2>Predicting Missing Rate</h2>
+<p>The final step of the Global Baseline Estimate algorithm is to
+predict ratings for movies that users have not yet seen. Missing ratings
+are represented by NA values in the dataset.The algorithm scans each
+user and identifies movies that have not been rated. A predicted rating
+is then generated using the formula above and inserted into the
+recommendation table.</p>
 <pre class="r"><code>Prediction_table &lt;- Movie_Rating_view %&gt;%
   filter(!users_name %in% c(&quot;movie_avrg&quot;,&quot;movie_bias&quot;))
 
 #movie_cols &lt;-2.7
 
 movie_cols &lt;- names(Movie_Rating_view)[!(names(Movie_Rating_view)%in% c(&quot;users_name&quot;,&quot;users_bias&quot;,&quot;users_avrg&quot;))]
-
 
 movie_cols</code></pre>
 <pre><code>## [1] &quot;Michael&quot;                      &quot;Minions_and_Monsters&quot;        
@@ -706,6 +744,34 @@ movie_cols</code></pre>
 ## The_Super_Mario_Galaxy_Movie 
 ##                        -0.15 
 ## Prediction = 2.516667</code></pre>
+</div>
+<div id="result" class="section level2">
+<h2>Result</h2>
+<p>The Global Baseline Estimate algorithm successfully generated
+predicted ratings for movies that users had not previously rated and
+seen. These predictions were based on the overall average rating, user
+rating tendencies, and movie popularity trends. Users with positive
+biases generally received higher predicted ratings, while users with
+negative biases received lower predicted ratings. Similarly, movies with
+positive movie biases tended to receive higher recommendation scores.The
+completed prediction table provides estimated ratings for all previously
+missing user-movie combinations and serves as the foundation for
+generating movie recommendations.</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>In conclusion, The recommendation process began by calculating a
+global average rating, followed by user and movie biases. These values
+were then used to estimate ratings for movies that users had not yet
+seen. The resulting predictions provide a simple but effective
+recommendation strategy without requiring advanced collaborative
+filtering techniques. One limitation of this approach is that the
+dataset contains a relatively small number of users and movies. As a
+result, recommendations may be heavily influenced by individual ratings.
+However, the project successfully demonstrates the core concepts behind
+recommendation systems and provides a foundation for more advanced
+recommendation algorithms in future assignments.</p>
+</div>
 </div>
 
 
