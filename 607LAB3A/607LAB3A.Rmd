@@ -84,8 +84,11 @@ movie_avrg <- colMeans(Movie_Rating_view[,2:(ncol(Movie_Rating_view))], na.rm = 
 
 movie_avrg
 
-movie_avrg_row<- data.frame(users_name ="movie_avrg", t(movie_avrg), user_avrg =mean(movie_avrg, na.rm = TRUE), users_bias =NA)
+movie_avrg_row<- data.frame(users_name ="movie_avrg", t(movie_avrg)) 
+                            
+                            #users_avrg =mean(movie_avrg, na.rm = TRUE))
 
+#users_bias =NA
 movie_avrg_row
 
 Movie_Rating_view <- bind_rows(Movie_Rating_view,movie_avrg_row)
@@ -96,7 +99,9 @@ Movie_Rating_view <- bind_rows(Movie_Rating_view,movie_avrg_row)
 movie_bias <-  movie_avrg - global_avrg
 
 movie_bias
-movie_bias_row<- data.frame(users_name ="movie_avrg -movies mean", t(movie_bias), user_avrg =NA,users_bias =NA)
+movie_bias_row<- data.frame(users_name ="movie_bias", t(movie_bias))
+                            
+                            #user_avrg =NA,users_bias =NA)
 
 movie_bias_row
 
@@ -105,7 +110,54 @@ Movie_Rating_view <- bind_rows(Movie_Rating_view,movie_bias_row)
 ```
 
 
-```{r}
-names(Movie_Rating_view)
+```{r GBE prediction}
+
+
+Prediction_table <- Movie_Rating_view %>%
+  filter(!users_name %in% c("movie_avrg","movie_bias"))
+
+#movie_cols <-2.7
+
+movie_cols <- names(Movie_Rating_view)[!(names(Movie_Rating_view)%in% c("users_name","users_bias","users_avrg"))]
+
+
+movie_cols
+
+global_avrg + Movie_Rating_view$users_bias +movie_bias["The_Odyssey"]
+
+for(i in 1:nrow(Prediction_table)) {
+
+ current_users_bias <- Prediction_table$users_bias[i]
+
+ for(j in movie_cols) {
+
+  if(!is.na(Prediction_table[[j]][i])) {
+    Prediction_table[i, j] <- NA
+    }
+   else{
+
+   cat("\n----------------------\n")
+   cat("User:", Prediction_table$users_name[i], "\n")
+   cat("Movie:", j, "\n")
+
+   print(global_avrg)
+   print(current_users_bias)
+   print(movie_bias[j])
+
+   predicted_rating <-
+    global_avrg +
+    current_users_bias +
+    movie_bias[j]
+
+   cat("Prediction =", predicted_rating, "\n")
+
+   Prediction_table[[j]][i] <-
+    round(predicted_rating, 2)
+
+  }
+
+ }
+
+}
 
 ```

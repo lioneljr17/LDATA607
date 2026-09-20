@@ -424,84 +424,288 @@ head((movie_ratings))</code></pre>
   distinct() %&gt;%
   pivot_wider (names_from =movie_title, values_from = rating)
 
+names(Movie_Rating_view) &lt;- gsub(&quot; &quot;,&quot;_&quot;, names(Movie_Rating_view))
+names(Movie_Rating_view) &lt;- gsub(&quot;&amp;&quot;,&quot;and&quot;, names(Movie_Rating_view))
+
 head(Movie_Rating_view)</code></pre>
 <pre><code>## # A tibble: 6 × 7
-##   users_name Michael `Minions &amp; Monsters` spider man brand new d…¹ `The Odyssey`
-##   &lt;chr&gt;        &lt;dbl&gt;                &lt;dbl&gt;                    &lt;dbl&gt;         &lt;dbl&gt;
-## 1 aly              5                    5                        5            NA
-## 2 church           4                   NA                        5            NA
-## 3 lionel          NA                    3                        5             4
-## 4 MIKE             3                   NA                        4             5
-## 5 paul            NA                    5                        5            NA
-## 6 zege             2                   NA                        5            NA
-## # ℹ abbreviated name: ¹​`spider man brand new day`
-## # ℹ 2 more variables: `The Super Mario Galaxy Movie` &lt;dbl&gt;, `Toy Story 5` &lt;dbl&gt;</code></pre>
+##   users_name Michael Minions_and_Monsters spider_man_brand_new_day The_Odyssey
+##   &lt;chr&gt;        &lt;dbl&gt;                &lt;dbl&gt;                    &lt;dbl&gt;       &lt;dbl&gt;
+## 1 aly              5                    5                        5          NA
+## 2 church           4                   NA                        5          NA
+## 3 lionel          NA                    3                        5           4
+## 4 MIKE             3                   NA                        4           5
+## 5 paul            NA                    5                        5          NA
+## 6 zege             2                   NA                        5          NA
+## # ℹ 2 more variables: The_Super_Mario_Galaxy_Movie &lt;dbl&gt;, Toy_Story_5 &lt;dbl&gt;</code></pre>
 <pre class="r"><code>global_avrg&lt;- mean (movies_ratings_withoutdup$rating,na.rm = TRUE)
 
 global_avrg</code></pre>
 <pre><code>## [1] 4.15</code></pre>
-<pre class="r"><code>Movie_Rating_view$uses_avrg &lt;- rowMeans(Movie_Rating_view[-1], na.rm = TRUE)
+<pre class="r"><code>Movie_Rating_view$users_avrg &lt;- rowMeans(Movie_Rating_view[-1], na.rm = TRUE)
 
 Movie_Rating_view</code></pre>
 <pre><code>## # A tibble: 6 × 8
-##   users_name Michael `Minions &amp; Monsters` spider man brand new d…¹ `The Odyssey`
-##   &lt;chr&gt;        &lt;dbl&gt;                &lt;dbl&gt;                    &lt;dbl&gt;         &lt;dbl&gt;
-## 1 aly              5                    5                        5            NA
-## 2 church           4                   NA                        5            NA
-## 3 lionel          NA                    3                        5             4
-## 4 MIKE             3                   NA                        4             5
-## 5 paul            NA                    5                        5            NA
-## 6 zege             2                   NA                        5            NA
-## # ℹ abbreviated name: ¹​`spider man brand new day`
-## # ℹ 3 more variables: `The Super Mario Galaxy Movie` &lt;dbl&gt;,
-## #   `Toy Story 5` &lt;dbl&gt;, uses_avrg &lt;dbl&gt;</code></pre>
-<pre class="r"><code>Movie_Rating_view$user_bias &lt;- Movie_Rating_view$uses_avrg - global_avrg
+##   users_name Michael Minions_and_Monsters spider_man_brand_new_day The_Odyssey
+##   &lt;chr&gt;        &lt;dbl&gt;                &lt;dbl&gt;                    &lt;dbl&gt;       &lt;dbl&gt;
+## 1 aly              5                    5                        5          NA
+## 2 church           4                   NA                        5          NA
+## 3 lionel          NA                    3                        5           4
+## 4 MIKE             3                   NA                        4           5
+## 5 paul            NA                    5                        5          NA
+## 6 zege             2                   NA                        5          NA
+## # ℹ 3 more variables: The_Super_Mario_Galaxy_Movie &lt;dbl&gt;, Toy_Story_5 &lt;dbl&gt;,
+## #   users_avrg &lt;dbl&gt;</code></pre>
+<pre class="r"><code>Movie_Rating_view$users_bias &lt;- Movie_Rating_view$users_avrg - global_avrg
 
 Movie_Rating_view</code></pre>
 <pre><code>## # A tibble: 6 × 9
-##   users_name Michael `Minions &amp; Monsters` spider man brand new d…¹ `The Odyssey`
-##   &lt;chr&gt;        &lt;dbl&gt;                &lt;dbl&gt;                    &lt;dbl&gt;         &lt;dbl&gt;
-## 1 aly              5                    5                        5            NA
-## 2 church           4                   NA                        5            NA
-## 3 lionel          NA                    3                        5             4
-## 4 MIKE             3                   NA                        4             5
-## 5 paul            NA                    5                        5            NA
-## 6 zege             2                   NA                        5            NA
-## # ℹ abbreviated name: ¹​`spider man brand new day`
-## # ℹ 4 more variables: `The Super Mario Galaxy Movie` &lt;dbl&gt;,
-## #   `Toy Story 5` &lt;dbl&gt;, uses_avrg &lt;dbl&gt;, user_bias &lt;dbl&gt;</code></pre>
-<pre class="r"><code>movie_avrg &lt;- colMeans(Movie_Rating_view[,2:(ncol(Movie_Rating_view))], na.rm = TRUE)
+##   users_name Michael Minions_and_Monsters spider_man_brand_new_day The_Odyssey
+##   &lt;chr&gt;        &lt;dbl&gt;                &lt;dbl&gt;                    &lt;dbl&gt;       &lt;dbl&gt;
+## 1 aly              5                    5                        5          NA
+## 2 church           4                   NA                        5          NA
+## 3 lionel          NA                    3                        5           4
+## 4 MIKE             3                   NA                        4           5
+## 5 paul            NA                    5                        5          NA
+## 6 zege             2                   NA                        5          NA
+## # ℹ 4 more variables: The_Super_Mario_Galaxy_Movie &lt;dbl&gt;, Toy_Story_5 &lt;dbl&gt;,
+## #   users_avrg &lt;dbl&gt;, users_bias &lt;dbl&gt;</code></pre>
+<pre class="r"><code>#movie_avrg_row &lt;- as.list(rep(NA,ncol(Movie_Rating_view)))
+movie_avrg &lt;- colMeans(Movie_Rating_view[,2:(ncol(Movie_Rating_view))], na.rm = TRUE)
 
 movie_avrg</code></pre>
-<pre><code>##                      Michael           Minions &amp; Monsters 
+<pre><code>##                      Michael         Minions_and_Monsters 
 ##                     3.500000                     4.333333 
-##     spider man brand new day                  The Odyssey 
+##     spider_man_brand_new_day                  The_Odyssey 
 ##                     4.833333                     4.500000 
-## The Super Mario Galaxy Movie                  Toy Story 5 
+## The_Super_Mario_Galaxy_Movie                  Toy_Story_5 
 ##                     4.000000                     3.500000 
-##                    uses_avrg                    user_bias 
+##                   users_avrg                   users_bias 
 ##                     4.125000                    -0.025000</code></pre>
-<pre class="r"><code>movie_avrg_row&lt;- data.frame(users_name =&quot;movie_avrg&quot;, t(movie_avrg), user_avrg =mean(movie_avrg, na.rm = TRUE), use_bias =NA)
+<pre class="r"><code>movie_avrg_row&lt;- data.frame(users_name =&quot;movie_avrg&quot;, t(movie_avrg)) 
+                            
+                            #users_avrg =mean(movie_avrg, na.rm = TRUE))
 
+#users_bias =NA
 movie_avrg_row</code></pre>
-<pre><code>##   users_name Michael Minions...Monsters spider.man.brand.new.day The.Odyssey
-## 1 movie_avrg     3.5           4.333333                 4.833333         4.5
-##   The.Super.Mario.Galaxy.Movie Toy.Story.5 uses_avrg user_bias user_avrg
-## 1                            4         3.5     4.125    -0.025  3.595833
-##   use_bias
-## 1       NA</code></pre>
-<pre class="r"><code>#Movie_Rating_view &lt;- bind_rows(movie_avrg_row)</code></pre>
-<pre class="r"><code>movie_bias &lt;- movie_avrg - global_avrg
+<pre><code>##   users_name Michael Minions_and_Monsters spider_man_brand_new_day The_Odyssey
+## 1 movie_avrg     3.5             4.333333                 4.833333         4.5
+##   The_Super_Mario_Galaxy_Movie Toy_Story_5 users_avrg users_bias
+## 1                            4         3.5      4.125     -0.025</code></pre>
+<pre class="r"><code>Movie_Rating_view &lt;- bind_rows(Movie_Rating_view,movie_avrg_row)</code></pre>
+<pre class="r"><code>movie_bias &lt;-  movie_avrg - global_avrg
 
 movie_bias</code></pre>
-<pre><code>##                      Michael           Minions &amp; Monsters 
+<pre><code>##                      Michael         Minions_and_Monsters 
 ##                   -0.6500000                    0.1833333 
-##     spider man brand new day                  The Odyssey 
+##     spider_man_brand_new_day                  The_Odyssey 
 ##                    0.6833333                    0.3500000 
-## The Super Mario Galaxy Movie                  Toy Story 5 
+## The_Super_Mario_Galaxy_Movie                  Toy_Story_5 
 ##                   -0.1500000                   -0.6500000 
-##                    uses_avrg                    user_bias 
+##                   users_avrg                   users_bias 
 ##                   -0.0250000                   -4.1750000</code></pre>
+<pre class="r"><code>movie_bias_row&lt;- data.frame(users_name =&quot;movie_bias&quot;, t(movie_bias))
+                            
+                            #user_avrg =NA,users_bias =NA)
+
+movie_bias_row</code></pre>
+<pre><code>##   users_name Michael Minions_and_Monsters spider_man_brand_new_day The_Odyssey
+## 1 movie_bias   -0.65            0.1833333                0.6833333        0.35
+##   The_Super_Mario_Galaxy_Movie Toy_Story_5 users_avrg users_bias
+## 1                        -0.15       -0.65     -0.025     -4.175</code></pre>
+<pre class="r"><code>Movie_Rating_view &lt;- bind_rows(Movie_Rating_view,movie_bias_row)</code></pre>
+<pre class="r"><code>Prediction_table &lt;- Movie_Rating_view %&gt;%
+  filter(!users_name %in% c(&quot;movie_avrg&quot;,&quot;movie_bias&quot;))
+
+#movie_cols &lt;-2.7
+
+movie_cols &lt;- names(Movie_Rating_view)[!(names(Movie_Rating_view)%in% c(&quot;users_name&quot;,&quot;users_bias&quot;,&quot;users_avrg&quot;))]
+
+
+movie_cols</code></pre>
+<pre><code>## [1] &quot;Michael&quot;                      &quot;Minions_and_Monsters&quot;        
+## [3] &quot;spider_man_brand_new_day&quot;     &quot;The_Odyssey&quot;                 
+## [5] &quot;The_Super_Mario_Galaxy_Movie&quot; &quot;Toy_Story_5&quot;</code></pre>
+<pre class="r"><code>global_avrg + Movie_Rating_view$users_bias +movie_bias[&quot;The_Odyssey&quot;]</code></pre>
+<pre><code>## [1] 4.850000 5.016667 4.600000 4.350000 5.016667 3.016667 4.475000 0.325000</code></pre>
+<pre class="r"><code>for(i in 1:nrow(Prediction_table)) {
+
+ current_users_bias &lt;- Prediction_table$users_bias[i]
+
+ for(j in movie_cols) {
+
+  if(!is.na(Prediction_table[[j]][i])) {
+    Prediction_table[i, j] &lt;- NA
+    }
+   else{
+
+   cat(&quot;\n----------------------\n&quot;)
+   cat(&quot;User:&quot;, Prediction_table$users_name[i], &quot;\n&quot;)
+   cat(&quot;Movie:&quot;, j, &quot;\n&quot;)
+
+   print(global_avrg)
+   print(current_users_bias)
+   print(movie_bias[j])
+
+   predicted_rating &lt;-
+    global_avrg +
+    current_users_bias +
+    movie_bias[j]
+
+   cat(&quot;Prediction =&quot;, predicted_rating, &quot;\n&quot;)
+
+   Prediction_table[[j]][i] &lt;-
+    round(predicted_rating, 2)
+
+  }
+
+ }
+
+}</code></pre>
+<pre><code>## 
+## ----------------------
+## User: aly 
+## Movie: The_Odyssey 
+## [1] 4.15
+## [1] 0.35
+## The_Odyssey 
+##        0.35 
+## Prediction = 4.85 
+## 
+## ----------------------
+## User: aly 
+## Movie: The_Super_Mario_Galaxy_Movie 
+## [1] 4.15
+## [1] 0.35
+## The_Super_Mario_Galaxy_Movie 
+##                        -0.15 
+## Prediction = 4.35 
+## 
+## ----------------------
+## User: church 
+## Movie: Minions_and_Monsters 
+## [1] 4.15
+## [1] 0.5166667
+## Minions_and_Monsters 
+##            0.1833333 
+## Prediction = 4.85 
+## 
+## ----------------------
+## User: church 
+## Movie: The_Odyssey 
+## [1] 4.15
+## [1] 0.5166667
+## The_Odyssey 
+##        0.35 
+## Prediction = 5.016667 
+## 
+## ----------------------
+## User: church 
+## Movie: The_Super_Mario_Galaxy_Movie 
+## [1] 4.15
+## [1] 0.5166667
+## The_Super_Mario_Galaxy_Movie 
+##                        -0.15 
+## Prediction = 4.516667 
+## 
+## ----------------------
+## User: lionel 
+## Movie: Michael 
+## [1] 4.15
+## [1] 0.1
+## Michael 
+##   -0.65 
+## Prediction = 3.6 
+## 
+## ----------------------
+## User: lionel 
+## Movie: The_Super_Mario_Galaxy_Movie 
+## [1] 4.15
+## [1] 0.1
+## The_Super_Mario_Galaxy_Movie 
+##                        -0.15 
+## Prediction = 4.1 
+## 
+## ----------------------
+## User: MIKE 
+## Movie: Minions_and_Monsters 
+## [1] 4.15
+## [1] -0.15
+## Minions_and_Monsters 
+##            0.1833333 
+## Prediction = 4.183333 
+## 
+## ----------------------
+## User: MIKE 
+## Movie: The_Super_Mario_Galaxy_Movie 
+## [1] 4.15
+## [1] -0.15
+## The_Super_Mario_Galaxy_Movie 
+##                        -0.15 
+## Prediction = 3.85 
+## 
+## ----------------------
+## User: MIKE 
+## Movie: Toy_Story_5 
+## [1] 4.15
+## [1] -0.15
+## Toy_Story_5 
+##       -0.65 
+## Prediction = 3.35 
+## 
+## ----------------------
+## User: paul 
+## Movie: Michael 
+## [1] 4.15
+## [1] 0.5166667
+## Michael 
+##   -0.65 
+## Prediction = 4.016667 
+## 
+## ----------------------
+## User: paul 
+## Movie: The_Odyssey 
+## [1] 4.15
+## [1] 0.5166667
+## The_Odyssey 
+##        0.35 
+## Prediction = 5.016667 
+## 
+## ----------------------
+## User: paul 
+## Movie: Toy_Story_5 
+## [1] 4.15
+## [1] 0.5166667
+## Toy_Story_5 
+##       -0.65 
+## Prediction = 4.016667 
+## 
+## ----------------------
+## User: zege 
+## Movie: Minions_and_Monsters 
+## [1] 4.15
+## [1] -1.483333
+## Minions_and_Monsters 
+##            0.1833333 
+## Prediction = 2.85 
+## 
+## ----------------------
+## User: zege 
+## Movie: The_Odyssey 
+## [1] 4.15
+## [1] -1.483333
+## The_Odyssey 
+##        0.35 
+## Prediction = 3.016667 
+## 
+## ----------------------
+## User: zege 
+## Movie: The_Super_Mario_Galaxy_Movie 
+## [1] 4.15
+## [1] -1.483333
+## The_Super_Mario_Galaxy_Movie 
+##                        -0.15 
+## Prediction = 2.516667</code></pre>
 </div>
 
 
