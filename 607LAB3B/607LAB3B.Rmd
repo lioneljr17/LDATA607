@@ -15,7 +15,7 @@ format:
     df-print: paged
     smooth-scroll: true
     embed-resources: true
-date: "2026-09-17"
+date: "2026-09-20"
 ---
 
 ```{r setup, include=FALSE}
@@ -28,20 +28,25 @@ library(slider)
 ```
 
 ## Introduction
-# Planned Approach
 
-For this assignment, I plan to use a time-series dataset containing daily prices for multiple stocks. The dataset will include a date column, an item identifier, and a numerical value representing the daily closing price.My approach will be to first clean and organize the data so that observations for each item are ordered chronologically. Once the data is properly structured, I will use window functions to calculate two metrics for each item: Year-to-Date (YTD) Average and  Six-Day Moving Average. I will compare the original values, YTD averages, and moving averages to observe how averaging's smoothing effect changes the data's trends.
-Anticipated Data Challenges
-a challenges That may arise during this analysis. is some datasets may contain missing dates due to weekends, holidays, or unavailable observations. This could affect moving average calculations if the data is not sorted correctly.
+For this assignment, I used a time-series dataset containing daily stock prices for two companies, AAPL and MSFT. The dataset includes a date column, a stock identifier, and a daily stock price.My approach was to organize the data chronologically and then apply window functions to calculate two metrics for each stock: Year-to-Date (YTD) Average,Six-Day Moving Average
+The YTD average provides a cumulative average from the beginning of the year through the current observation. The six-day moving average uses a rolling window consisting of the current day and the previous five days. These calculations help smooth fluctuations in stock prices and make trends easier to identify.
 
-```{r}
+#Data
+
+The dataset used in this analysis was a generated stock-price dataset containing 30 days of observations for two stocks, AAPL and MSFT. The data was stored in a CSV file and imported into R for analysis.
+
+```{r Data}
 library(readr)
-stock_prices <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607LAB3B/stock_prices.csv")
+stock_prices <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607LAB3B/stock_prices.csv", show_col_types = FALSE)
 View(stock_prices)
 
 head(stock_prices)
 ```
 
+## Calculating the YTD Average
+
+In this section, I do the first window function, calculates a Year-to-Date average for each stock. This is a cumulative average that includes all observations from the beginning of the dataset through the current row.
 
 ```{r YTD avrg}
 stocks_ytd <- stock_prices %>%
@@ -52,7 +57,9 @@ stocks_ytd <- stock_prices %>%
  )
 ```
 
+# Calculating the Six-Day Moving Average
 
+in this section,I do the second window function, calculates a six-day moving average. For each observation, the calculation uses the current day's price and the previous 5 days' prices. As the window moves forward, the oldest value is dropped, and the newest value is added.
 
 ```{r 6-day moving average}
 stocks_final <- stocks_ytd %>%
@@ -68,16 +75,16 @@ stocks_final <- stocks_ytd %>%
  )
 write_csv(stocks_final,"stock_final.csv")
 
-head(stocks_final)
+head(stocks_final,15)
 ```
 
 ## result
-The Year-to-Date average provides a cumulative view of stock performance from the beginning of the year through each observation. As additional observations are added, the average becomes less sensitive to daily fluctuations.
+The Year-to-Date average provides a cumulative view of stock performance from the beginning of the year through each observation. As additional observations are added, the average becomes less sensitive to daily fluctuations.The six-day moving average uses a rolling window that contains the current observation and the previous five observations. This creates a smoother trend line by reducing the impact of short-term price changes.Both calculations were performed separately for each stock using window functions, ensuring that observations from different stocks were not combined.
 
-The six-day moving average uses a rolling window that contains the current observation and the previous five observations. This creates a smoother trend line by reducing the impact of short-term price changes.
 
-Both calculations were performed separately for each stock using window functions, ensuring that observations from different stocks were not combined.
+# Visualization
 
+The following graph compares the original stock prices with the Year-to-Date average and the six-day moving average for each stock. The moving average line is smoother than the original price line because it averages multiple observations together.
 
 ```{r graph}
 ggplot(
@@ -113,4 +120,3 @@ ggplot(
 
 This analysis demonstrated the use of window functions on time-series data. Using stock prices for AAPL and MSFT, I calculated both a Year-to-Date average and a six-day moving average.
 The YTD average provided a cumulative measure of performance throughout the year, while the six-day moving average highlighted short-term trends by smoothing daily fluctuations. These calculations illustrate how window functions can be used to analyze sequential data without collapsing the dataset through aggregation.
-Window functions are valuable because they allow calculations to be performed across related rows while preserving the original observations, making them especially useful for financial and time-series analysis.
