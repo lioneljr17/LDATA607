@@ -465,32 +465,12 @@ gives higher ratings, while a negative user bias indicates that a user
 tends to rate movies lower than average.</p>
 <pre class="r"><code>Movie_Rating_view$users_avrg &lt;- rowMeans(Movie_Rating_view[-1], na.rm = TRUE)
 
-Movie_Rating_view</code></pre>
-<pre><code>## # A tibble: 6 × 8
-##   users_name Michael Minions_and_Monsters spider_man_brand_new_day The_Odyssey
-##   &lt;chr&gt;        &lt;dbl&gt;                &lt;dbl&gt;                    &lt;dbl&gt;       &lt;dbl&gt;
-## 1 aly              5                    5                        5          NA
-## 2 church           4                   NA                        5          NA
-## 3 lionel          NA                    3                        5           4
-## 4 MIKE             3                   NA                        4           5
-## 5 paul            NA                    5                        5          NA
-## 6 zege             2                   NA                        5          NA
-## # ℹ 3 more variables: The_Super_Mario_Galaxy_Movie &lt;dbl&gt;, Toy_Story_5 &lt;dbl&gt;,
-## #   users_avrg &lt;dbl&gt;</code></pre>
+Movie_Rating_view$users_avrg</code></pre>
+<pre><code>## [1] 4.500000 4.666667 4.250000 4.000000 4.666667 2.666667</code></pre>
 <pre class="r"><code>Movie_Rating_view$users_bias &lt;- Movie_Rating_view$users_avrg - global_avrg
 
-Movie_Rating_view</code></pre>
-<pre><code>## # A tibble: 6 × 9
-##   users_name Michael Minions_and_Monsters spider_man_brand_new_day The_Odyssey
-##   &lt;chr&gt;        &lt;dbl&gt;                &lt;dbl&gt;                    &lt;dbl&gt;       &lt;dbl&gt;
-## 1 aly              5                    5                        5          NA
-## 2 church           4                   NA                        5          NA
-## 3 lionel          NA                    3                        5           4
-## 4 MIKE             3                   NA                        4           5
-## 5 paul            NA                    5                        5          NA
-## 6 zege             2                   NA                        5          NA
-## # ℹ 4 more variables: The_Super_Mario_Galaxy_Movie &lt;dbl&gt;, Toy_Story_5 &lt;dbl&gt;,
-## #   users_avrg &lt;dbl&gt;, users_bias &lt;dbl&gt;</code></pre>
+Movie_Rating_view$users_bias</code></pre>
+<pre><code>## [1]  0.3500000  0.5166667  0.1000000 -0.1500000  0.5166667 -1.4833333</code></pre>
 </div>
 <div id="calculating-movie-averages-and-movies-bias" class="section level2">
 <h2>Calculating Movie Averages and Movies Bias</h2>

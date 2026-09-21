@@ -81,11 +81,11 @@ User bias measures whether a user tends to rate movies higher or lower than the 
 ```{r uses avrg, user bias}
 Movie_Rating_view$users_avrg <- rowMeans(Movie_Rating_view[-1], na.rm = TRUE)
 
-Movie_Rating_view
+Movie_Rating_view$users_avrg
 
 Movie_Rating_view$users_bias <- Movie_Rating_view$users_avrg - global_avrg
 
-Movie_Rating_view
+Movie_Rating_view$users_bias
 ```
 
 ## Calculating Movie Averages and Movies Bias
