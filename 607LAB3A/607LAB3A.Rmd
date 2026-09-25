@@ -169,7 +169,7 @@ for(i in 1:nrow(Prediction_table)) {
  }
 
 }
-
+write_csv(Prediction_table,"Prediction_table")
 ```
 
 ## Result 
