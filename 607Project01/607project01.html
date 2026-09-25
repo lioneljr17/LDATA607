@@ -399,6 +399,778 @@ rating.And because the source file is not stored in a traditional
 tabular format, multiple parsing and data-cleaning steps were required
 before the information could be transformed into a structured dataset
 suitable for analysis.</p>
+<pre class="r"><code>players_df &lt;- data.frame(
+ player_num = integer(),
+ player_name = character(),
+ state = character(),
+ points = numeric(),
+ pre_rating = integer(),
+ r1 = integer(),
+ r2 = integer(),
+ r3 = integer(),
+ r4 = integer(),
+ r5 = integer(),
+ r6 = integer(),
+ r7 = integer(),
+ stringsAsFactors = FALSE
+)
+
+players_df</code></pre>
+<pre><code>##  [1] player_num  player_name state       points      pre_rating  r1         
+##  [7] r2          r3          r4          r5          r6          r7         
+## &lt;0 rows&gt; (or 0-length row.names)</code></pre>
+<pre class="r"><code>lines&lt;- read_lines(&quot;tournamentinfo.txt&quot;)
+length(lines)</code></pre>
+<pre><code>## [1] 196</code></pre>
+<pre class="r"><code>head(lines,10)</code></pre>
+<pre><code>##  [1] &quot;-----------------------------------------------------------------------------------------&quot; 
+##  [2] &quot; Pair | Player Name                     |Total|Round|Round|Round|Round|Round|Round|Round| &quot;
+##  [3] &quot; Num  | USCF ID / Rtg (Pre-&gt;Post)       | Pts |  1  |  2  |  3  |  4  |  5  |  6  |  7  | &quot;
+##  [4] &quot;-----------------------------------------------------------------------------------------&quot; 
+##  [5] &quot;    1 | GARY HUA                        |6.0  |W  39|W  21|W  18|W  14|W   7|D  12|D   4|&quot; 
+##  [6] &quot;   ON | 15445895 / R: 1794   -&gt;1817     |N:2  |W    |B    |W    |B    |W    |B    |W    |&quot; 
+##  [7] &quot;-----------------------------------------------------------------------------------------&quot; 
+##  [8] &quot;    2 | DAKSHESH DARURI                 |6.0  |W  63|W  58|L   4|W  17|W  16|W  20|W   7|&quot; 
+##  [9] &quot;   MI | 14598900 / R: 1553   -&gt;1663     |N:2  |B    |W    |B    |W    |B    |W    |B    |&quot; 
+## [10] &quot;-----------------------------------------------------------------------------------------&quot;</code></pre>
+<pre class="r"><code>player_lines &lt;- grep(&quot;^\\s*[0-9]+\\s*\\|&quot;, lines)
+head(player_lines)</code></pre>
+<pre><code>## [1]  5  8 11 14 17 20</code></pre>
+</div>
+<div id="testing-logic-before-doing-the-loops" class="section level2">
+<h2>Testing logic before doing the loops</h2>
+<p>```{“testsection”} lines&lt;- read_lines(“tournamentinfo.txt”)
+length(lines) head(lines,10)</p>
+<p>player_lines &lt;- grep(“^\s<em>[0-9]+\s</em>\|”, lines)
+head(player_lines)</p>
+<p>lines[player_lines[1]] lines[player_lines[1]+1] line1 &lt;-
+lines[player_lines[1]]</p>
+<p>parts1 &lt;-trimws(strsplit(line1,“\|”)[[1]])</p>
+<p>parts1</p>
+<p>player_lines</p>
+<p>player_num &lt;- as.integer(parts1[1])</p>
+<p>player_name &lt;- parts1[2]</p>
+<p>points &lt;- as.numeric(parts1[3])</p>
+<p>player_num player_name points line2 &lt;-
+lines[player_lines[1]+1]</p>
+<p>line2</p>
+<p>parts2 &lt;- trimws(strsplit(line2,“\|”)[[1]])</p>
+<p>parts2</p>
+<p>state &lt;- parts2[1] state</p>
+<p>pre_rating
+&lt;-as.integer(sub(“.<em>R:\s</em>([0-9]+).*“,”\1”,parts2[2]))
+pre_rating</p>
+<p>Extract_opponent &lt;- function(x) {</p>
+<p>num &lt;- gsub(“[^0-9]”, ““, x)</p>
+<p>if (num == ““) { return(NA) }</p>
+<p>as.integer(num) }</p>
+<p>Extract_opponent(parts1[4])</p>
+<p>Extract_opponent(parts1[9])</p>
+<p>r1 &lt;-Extract_opponent(parts1[4]) r2
+&lt;-Extract_opponent(parts1[5]) r3 &lt;-Extract_opponent(parts1[6]) r4
+&lt;-Extract_opponent(parts1[7]) r5 &lt;-Extract_opponent(parts1[8]) r6
+&lt;-Extract_opponent(parts1[9]) r7
+&lt;-Extract_opponent(parts1[10])</p>
+<p>new_player &lt;- data.frame( player_num = player_num, player_name =
+player_name, state = state, points = points, pre_rating = pre_rating, r1
+= r1, r2 = r2, r3 = r3, r4 = r4, r5 = r5, r6 = r6, r7 = r7 )</p>
+<p>new_player</p>
+<p>players_df &lt;- rbind(players_df, new_player)</p>
+<p>head(players_df)</p>
+<pre><code>
+
+
+``` r
+Extract_opponent &lt;- function(x) {
+
+ num &lt;- gsub(&quot;[^0-9]&quot;, &quot;&quot;, x)
+
+ if (num == &quot;&quot;) {
+  return(NA)
+ }
+
+ as.integer(num)
+}
+
+for(i in player_lines){
+
+ # First line
+ line1 &lt;- lines[i]
+ parts1 &lt;- trimws(strsplit(line1, &quot;\\|&quot;)[[1]])
+
+ # Second line
+ line2 &lt;- lines[i + 1]
+ parts2 &lt;- trimws(strsplit(line2, &quot;\\|&quot;)[[1]])
+
+ # Basic fields
+ player_num &lt;- as.integer(parts1[1])
+ player_name &lt;- parts1[2]
+ points &lt;- as.numeric(parts1[3])
+
+ state &lt;- parts2[1]
+
+ pre_rating &lt;- as.integer(
+  sub(&quot;.*R:\\s*([0-9]+).*&quot;, &quot;\\1&quot;, parts2[2])
+ )
+
+ # Opponents
+ r1 &lt;- Extract_opponent(parts1[4])
+ r2 &lt;- Extract_opponent(parts1[5])
+ r3 &lt;- Extract_opponent(parts1[6])
+ r4 &lt;- Extract_opponent(parts1[7])
+ r5 &lt;- Extract_opponent(parts1[8])
+ r6 &lt;- Extract_opponent(parts1[9])
+ r7 &lt;- Extract_opponent(parts1[10])
+
+ # Create row
+ new_player &lt;- data.frame(
+  player_num,
+  player_name,
+  state,
+  points,
+  pre_rating,
+  r1,r2,r3,r4,r5,r6,r7
+ )
+
+ # Add to dataframe
+ players_df &lt;- rbind(players_df, new_player)
+}
+
+write.csv (players_df,&quot;players_table.csv&quot;, row.names=FALSE)</code></pre>
+<pre class="r"><code>games_df &lt;- data.frame(
+ player_num = integer(),
+ round_num = integer(),
+ opponent_num = integer(),
+ stringsAsFactors = FALSE
+)</code></pre>
+<pre class="r"><code>for(i in 1:nrow(players_df)) {
+
+ player_id &lt;- players_df$player_num[i]
+
+ for(round in 1:7) {
+
+  opponent &lt;- players_df[i, paste0(&quot;r&quot;, round)]
+
+  if(!is.na(opponent)) {
+
+   games_df &lt;- rbind(
+    games_df,
+    data.frame(
+     player_num = player_id,
+     round_num = round,
+     opponent_num = opponent
+    )
+   )
+
+  }
+
+ }
+
+}
+
+write.csv (games_df,&quot;gameplayed_table.csv&quot;, row.names=FALSE)</code></pre>
+<pre class="r"><code>ratings_lookup &lt;- players_df %&gt;%
+ select(player_num, pre_rating)
+
+ratings_lookup</code></pre>
+<pre><code>##    player_num pre_rating
+## 1           1       1794
+## 2           2       1553
+## 3           3       1384
+## 4           4       1716
+## 5           5       1655
+## 6           6       1686
+## 7           7       1649
+## 8           8       1641
+## 9           9       1411
+## 10         10       1365
+## 11         11       1712
+## 12         12       1663
+## 13         13       1666
+## 14         14       1610
+## 15         15       1220
+## 16         16       1604
+## 17         17       1629
+## 18         18       1600
+## 19         19       1564
+## 20         20       1595
+## 21         21       1563
+## 22         22       1555
+## 23         23       1363
+## 24         24       1229
+## 25         25       1745
+## 26         26       1579
+## 27         27       1552
+## 28         28       1507
+## 29         29       1602
+## 30         30       1522
+## 31         31       1494
+## 32         32       1441
+## 33         33       1449
+## 34         34       1399
+## 35         35       1438
+## 36         36       1355
+## 37         37        980
+## 38         38       1423
+## 39         39       1436
+## 40         40       1348
+## 41         41       1403
+## 42         42       1332
+## 43         43       1283
+## 44         44       1199
+## 45         45       1242
+## 46         46        377
+## 47         47       1362
+## 48         48       1382
+## 49         49       1291
+## 50         50       1056
+## 51         51       1011
+## 52         52        935
+## 53         53       1393
+## 54         54       1270
+## 55         55       1186
+## 56         56       1153
+## 57         57       1092
+## 58         58        917
+## 59         59        853
+## 60         60        967
+## 61         61        955
+## 62         62       1530
+## 63         63       1175
+## 64         64       1163</code></pre>
+<pre class="r"><code>games_ratings_df &lt;- games_df %&gt;%
+ left_join(
+  ratings_lookup,
+  by = c(&quot;opponent_num&quot; = &quot;player_num&quot;)
+ )
+
+games_ratings_df</code></pre>
+<pre><code>##     player_num round_num opponent_num pre_rating
+## 1            1         1           39       1436
+## 2            1         2           21       1563
+## 3            1         3           18       1600
+## 4            1         4           14       1610
+## 5            1         5            7       1649
+## 6            1         6           12       1663
+## 7            1         7            4       1716
+## 8            2         1           63       1175
+## 9            2         2           58        917
+## 10           2         3            4       1716
+## 11           2         4           17       1629
+## 12           2         5           16       1604
+## 13           2         6           20       1595
+## 14           2         7            7       1649
+## 15           3         1            8       1641
+## 16           3         2           61        955
+## 17           3         3           25       1745
+## 18           3         4           21       1563
+## 19           3         5           11       1712
+## 20           3         6           13       1666
+## 21           3         7           12       1663
+## 22           4         1           23       1363
+## 23           4         2           28       1507
+## 24           4         3            2       1553
+## 25           4         4           26       1579
+## 26           4         5            5       1655
+## 27           4         6           19       1564
+## 28           4         7            1       1794
+## 29           5         1           45       1242
+## 30           5         2           37        980
+## 31           5         3           12       1663
+## 32           5         4           13       1666
+## 33           5         5            4       1716
+## 34           5         6           14       1610
+## 35           5         7           17       1629
+## 36           6         1           34       1399
+## 37           6         2           29       1602
+## 38           6         3           11       1712
+## 39           6         4           35       1438
+## 40           6         5           10       1365
+## 41           6         6           27       1552
+## 42           6         7           21       1563
+## 43           7         1           57       1092
+## 44           7         2           46        377
+## 45           7         3           13       1666
+## 46           7         4           11       1712
+## 47           7         5            1       1794
+## 48           7         6            9       1411
+## 49           7         7            2       1553
+## 50           8         1            3       1384
+## 51           8         2           32       1441
+## 52           8         3           14       1610
+## 53           8         4            9       1411
+## 54           8         5           47       1362
+## 55           8         6           28       1507
+## 56           8         7           19       1564
+## 57           9         1           25       1745
+## 58           9         2           18       1600
+## 59           9         3           59        853
+## 60           9         4            8       1641
+## 61           9         5           26       1579
+## 62           9         6            7       1649
+## 63           9         7           20       1595
+## 64          10         1           16       1604
+## 65          10         2           19       1564
+## 66          10         3           55       1186
+## 67          10         4           31       1494
+## 68          10         5            6       1686
+## 69          10         6           25       1745
+## 70          10         7           18       1600
+## 71          11         1           38       1423
+## 72          11         2           56       1153
+## 73          11         3            6       1686
+## 74          11         4            7       1649
+## 75          11         5            3       1384
+## 76          11         6           34       1399
+## 77          11         7           26       1579
+## 78          12         1           42       1332
+## 79          12         2           33       1449
+## 80          12         3            5       1655
+## 81          12         4           38       1423
+## 82          12         6            1       1794
+## 83          12         7            3       1384
+## 84          13         1           36       1355
+## 85          13         2           27       1552
+## 86          13         3            7       1649
+## 87          13         4            5       1655
+## 88          13         5           33       1449
+## 89          13         6            3       1384
+## 90          13         7           32       1441
+## 91          14         1           54       1270
+## 92          14         2           44       1199
+## 93          14         3            8       1641
+## 94          14         4            1       1794
+## 95          14         5           27       1552
+## 96          14         6            5       1655
+## 97          14         7           31       1494
+## 98          15         1           19       1564
+## 99          15         2           16       1604
+## 100         15         3           30       1522
+## 101         15         4           22       1555
+## 102         15         5           54       1270
+## 103         15         6           33       1449
+## 104         15         7           38       1423
+## 105         16         1           10       1365
+## 106         16         2           15       1220
+## 107         16         4           39       1436
+## 108         16         5            2       1553
+## 109         16         6           36       1355
+## 110         17         1           48       1382
+## 111         17         2           41       1403
+## 112         17         3           26       1579
+## 113         17         4            2       1553
+## 114         17         5           23       1363
+## 115         17         6           22       1555
+## 116         17         7            5       1655
+## 117         18         1           47       1362
+## 118         18         2            9       1411
+## 119         18         3            1       1794
+## 120         18         4           32       1441
+## 121         18         5           19       1564
+## 122         18         6           38       1423
+## 123         18         7           10       1365
+## 124         19         1           15       1220
+## 125         19         2           10       1365
+## 126         19         3           52        935
+## 127         19         4           28       1507
+## 128         19         5           18       1600
+## 129         19         6            4       1716
+## 130         19         7            8       1641
+## 131         20         1           40       1348
+## 132         20         2           49       1291
+## 133         20         3           23       1363
+## 134         20         4           41       1403
+## 135         20         5           28       1507
+## 136         20         6            2       1553
+## 137         20         7            9       1411
+## 138         21         1           43       1283
+## 139         21         2            1       1794
+## 140         21         3           47       1362
+## 141         21         4            3       1384
+## 142         21         5           40       1348
+## 143         21         6           39       1436
+## 144         21         7            6       1686
+## 145         22         1           64       1163
+## 146         22         2           52        935
+## 147         22         3           28       1507
+## 148         22         4           15       1220
+## 149         22         6           17       1629
+## 150         22         7           40       1348
+## 151         23         1            4       1716
+## 152         23         2           43       1283
+## 153         23         3           20       1595
+## 154         23         4           58        917
+## 155         23         5           17       1629
+## 156         23         6           37        980
+## 157         23         7           46        377
+## 158         24         1           28       1507
+## 159         24         2           47       1362
+## 160         24         3           43       1283
+## 161         24         4           25       1745
+## 162         24         5           60        967
+## 163         24         6           44       1199
+## 164         24         7           39       1436
+## 165         25         1            9       1411
+## 166         25         2           53       1393
+## 167         25         3            3       1384
+## 168         25         4           24       1229
+## 169         25         5           34       1399
+## 170         25         6           10       1365
+## 171         25         7           47       1362
+## 172         26         1           49       1291
+## 173         26         2           40       1348
+## 174         26         3           17       1629
+## 175         26         4            4       1716
+## 176         26         5            9       1411
+## 177         26         6           32       1441
+## 178         26         7           11       1712
+## 179         27         1           51       1011
+## 180         27         2           13       1666
+## 181         27         3           46        377
+## 182         27         4           37        980
+## 183         27         5           14       1610
+## 184         27         6            6       1686
+## 185         28         1           24       1229
+## 186         28         2            4       1716
+## 187         28         3           22       1555
+## 188         28         4           19       1564
+## 189         28         5           20       1595
+## 190         28         6            8       1641
+## 191         28         7           36       1355
+## 192         29         1           50       1056
+## 193         29         2            6       1686
+## 194         29         3           38       1423
+## 195         29         4           34       1399
+## 196         29         5           52        935
+## 197         29         6           48       1382
+## 198         30         1           52        935
+## 199         30         2           64       1163
+## 200         30         3           15       1220
+## 201         30         4           55       1186
+## 202         30         5           31       1494
+## 203         30         6           61        955
+## 204         30         7           50       1056
+## 205         31         1           58        917
+## 206         31         2           55       1186
+## 207         31         3           64       1163
+## 208         31         4           10       1365
+## 209         31         5           30       1522
+## 210         31         6           50       1056
+## 211         31         7           14       1610
+## 212         32         1           61        955
+## 213         32         2            8       1641
+## 214         32         3           44       1199
+## 215         32         4           18       1600
+## 216         32         5           51       1011
+## 217         32         6           26       1579
+## 218         32         7           13       1666
+## 219         33         1           60        967
+## 220         33         2           12       1663
+## 221         33         3           50       1056
+## 222         33         4           36       1355
+## 223         33         5           13       1666
+## 224         33         6           15       1220
+## 225         33         7           51       1011
+## 226         34         1            6       1686
+## 227         34         2           60        967
+## 228         34         3           37        980
+## 229         34         4           29       1602
+## 230         34         5           25       1745
+## 231         34         6           11       1712
+## 232         34         7           52        935
+## 233         35         1           46        377
+## 234         35         2           38       1423
+## 235         35         3           56       1153
+## 236         35         4            6       1686
+## 237         35         5           57       1092
+## 238         35         6           52        935
+## 239         35         7           48       1382
+## 240         36         1           13       1666
+## 241         36         2           57       1092
+## 242         36         3           51       1011
+## 243         36         4           33       1449
+## 244         36         6           16       1604
+## 245         36         7           28       1507
+## 246         37         2            5       1655
+## 247         37         3           34       1399
+## 248         37         4           27       1552
+## 249         37         6           23       1363
+## 250         37         7           61        955
+## 251         38         1           11       1712
+## 252         38         2           35       1438
+## 253         38         3           29       1602
+## 254         38         4           12       1663
+## 255         38         6           18       1600
+## 256         38         7           15       1220
+## 257         39         1            1       1794
+## 258         39         2           54       1270
+## 259         39         3           40       1348
+## 260         39         4           16       1604
+## 261         39         5           44       1199
+## 262         39         6           21       1563
+## 263         39         7           24       1229
+## 264         40         1           20       1595
+## 265         40         2           26       1579
+## 266         40         3           39       1436
+## 267         40         4           59        853
+## 268         40         5           21       1563
+## 269         40         6           56       1153
+## 270         40         7           22       1555
+## 271         41         1           59        853
+## 272         41         2           17       1629
+## 273         41         3           58        917
+## 274         41         4           20       1595
+## 275         42         1           12       1663
+## 276         42         2           50       1056
+## 277         42         3           57       1092
+## 278         42         4           60        967
+## 279         42         5           61        955
+## 280         42         6           64       1163
+## 281         42         7           56       1153
+## 282         43         1           21       1563
+## 283         43         2           23       1363
+## 284         43         3           24       1229
+## 285         43         4           63       1175
+## 286         43         5           59        853
+## 287         43         6           46        377
+## 288         43         7           55       1186
+## 289         44         2           14       1610
+## 290         44         3           32       1441
+## 291         44         4           53       1393
+## 292         44         5           39       1436
+## 293         44         6           24       1229
+## 294         44         7           59        853
+## 295         45         1            5       1655
+## 296         45         2           51       1011
+## 297         45         3           60        967
+## 298         45         4           56       1153
+## 299         45         5           63       1175
+## 300         45         6           55       1186
+## 301         45         7           58        917
+## 302         46         1           35       1438
+## 303         46         2            7       1649
+## 304         46         3           27       1552
+## 305         46         4           50       1056
+## 306         46         5           64       1163
+## 307         46         6           43       1283
+## 308         46         7           23       1363
+## 309         47         1           18       1600
+## 310         47         2           24       1229
+## 311         47         3           21       1563
+## 312         47         4           61        955
+## 313         47         5            8       1641
+## 314         47         6           51       1011
+## 315         47         7           25       1745
+## 316         48         1           17       1629
+## 317         48         2           63       1175
+## 318         48         4           52        935
+## 319         48         6           29       1602
+## 320         48         7           35       1438
+## 321         49         1           26       1579
+## 322         49         2           20       1595
+## 323         49         3           63       1175
+## 324         49         4           64       1163
+## 325         49         5           58        917
+## 326         50         1           29       1602
+## 327         50         2           42       1332
+## 328         50         3           33       1449
+## 329         50         4           46        377
+## 330         50         6           31       1494
+## 331         50         7           30       1522
+## 332         51         1           27       1552
+## 333         51         2           45       1242
+## 334         51         3           36       1355
+## 335         51         4           57       1092
+## 336         51         5           32       1441
+## 337         51         6           47       1362
+## 338         51         7           33       1449
+## 339         52         1           30       1522
+## 340         52         2           22       1555
+## 341         52         3           19       1564
+## 342         52         4           48       1382
+## 343         52         5           29       1602
+## 344         52         6           35       1438
+## 345         52         7           34       1399
+## 346         53         2           25       1745
+## 347         53         4           44       1199
+## 348         53         6           57       1092
+## 349         54         1           14       1610
+## 350         54         2           39       1436
+## 351         54         3           61        955
+## 352         54         5           15       1220
+## 353         54         6           59        853
+## 354         54         7           64       1163
+## 355         55         1           62       1530
+## 356         55         2           31       1494
+## 357         55         3           10       1365
+## 358         55         4           30       1522
+## 359         55         6           45       1242
+## 360         55         7           43       1283
+## 361         56         2           11       1712
+## 362         56         3           35       1438
+## 363         56         4           45       1242
+## 364         56         6           40       1348
+## 365         56         7           42       1332
+## 366         57         1            7       1649
+## 367         57         2           36       1355
+## 368         57         3           42       1332
+## 369         57         4           51       1011
+## 370         57         5           35       1438
+## 371         57         6           53       1393
+## 372         58         1           31       1494
+## 373         58         2            2       1553
+## 374         58         3           41       1403
+## 375         58         4           23       1363
+## 376         58         5           49       1291
+## 377         58         7           45       1242
+## 378         59         1           41       1403
+## 379         59         3            9       1411
+## 380         59         4           40       1348
+## 381         59         5           43       1283
+## 382         59         6           54       1270
+## 383         59         7           44       1199
+## 384         60         1           33       1449
+## 385         60         2           34       1399
+## 386         60         3           45       1242
+## 387         60         4           42       1332
+## 388         60         5           24       1229
+## 389         61         1           32       1441
+## 390         61         2            3       1384
+## 391         61         3           54       1270
+## 392         61         4           47       1362
+## 393         61         5           42       1332
+## 394         61         6           30       1522
+## 395         61         7           37        980
+## 396         62         1           55       1186
+## 397         63         1            2       1553
+## 398         63         2           48       1382
+## 399         63         3           49       1291
+## 400         63         4           43       1283
+## 401         63         5           45       1242
+## 402         64         1           22       1555
+## 403         64         2           30       1522
+## 404         64         3           31       1494
+## 405         64         4           49       1291
+## 406         64         5           46        377
+## 407         64         6           42       1332
+## 408         64         7           54       1270</code></pre>
+<pre class="r"><code>avg_ratings_df &lt;- games_ratings_df %&gt;%
+ group_by(player_num) %&gt;%
+ summarise(
+  avg_opp_rating = round(mean(pre_rating))
+ )
+
+avg_ratings_df %&gt;%
+ filter(player_num == 1)</code></pre>
+<pre><code>## # A tibble: 1 × 2
+##   player_num avg_opp_rating
+##        &lt;int&gt;          &lt;dbl&gt;
+## 1          1           1605</code></pre>
+<pre class="r"><code>avg_ratings_df</code></pre>
+<pre><code>## # A tibble: 64 × 2
+##    player_num avg_opp_rating
+##         &lt;int&gt;          &lt;dbl&gt;
+##  1          1           1605
+##  2          2           1469
+##  3          3           1564
+##  4          4           1574
+##  5          5           1501
+##  6          6           1519
+##  7          7           1372
+##  8          8           1468
+##  9          9           1523
+## 10         10           1554
+## # ℹ 54 more rows</code></pre>
+<pre class="r"><code>final_df &lt;- players_df %&gt;%
+ select(
+  player_num,
+  player_name,
+  state,
+  points,
+  pre_rating
+ ) %&gt;%
+ left_join(
+  avg_ratings_df,
+  by = &quot;player_num&quot;
+ )
+
+
+final_output &lt;- final_df %&gt;%
+ select(
+  player_name,
+  state,
+  points,
+  pre_rating,
+  avg_opp_rating
+ )
+
+final_output</code></pre>
+<pre><code>##                   player_name state points pre_rating avg_opp_rating
+## 1                    GARY HUA    ON    6.0       1794           1605
+## 2             DAKSHESH DARURI    MI    6.0       1553           1469
+## 3                ADITYA BAJAJ    MI    6.0       1384           1564
+## 4         PATRICK H SCHILLING    MI    5.5       1716           1574
+## 5                  HANSHI ZUO    MI    5.5       1655           1501
+## 6                 HANSEN SONG    OH    5.0       1686           1519
+## 7           GARY DEE SWATHELL    MI    5.0       1649           1372
+## 8            EZEKIEL HOUGHTON    MI    5.0       1641           1468
+## 9                 STEFANO LEE    ON    5.0       1411           1523
+## 10                  ANVIT RAO    MI    5.0       1365           1554
+## 11   CAMERON WILLIAM MC LEMAN    MI    4.5       1712           1468
+## 12             KENNETH J TACK    MI    4.5       1663           1506
+## 13          TORRANCE HENRY JR    MI    4.5       1666           1498
+## 14               BRADLEY SHAW    MI    4.5       1610           1515
+## 15     ZACHARY JAMES HOUGHTON    MI    4.5       1220           1484
+## 16               MIKE NIKITIN    MI    4.0       1604           1386
+## 17         RONALD GRZEGORCZYK    MI    4.0       1629           1499
+## 18              DAVID SUNDEEN    MI    4.0       1600           1480
+## 19               DIPANKAR ROY    MI    4.0       1564           1426
+## 20                JASON ZHENG    MI    4.0       1595           1411
+## 21              DINH DANG BUI    ON    4.0       1563           1470
+## 22           EUGENE L MCCLURE    MI    4.0       1555           1300
+## 23                   ALAN BUI    ON    4.0       1363           1214
+## 24          MICHAEL R ALDRICH    MI    4.0       1229           1357
+## 25           LOREN SCHWIEBERT    MI    3.5       1745           1363
+## 26                    MAX ZHU    ON    3.5       1579           1507
+## 27             GAURAV GIDWANI    MI    3.5       1552           1222
+## 28 SOFIA ADINA STANESCU-BELLU    MI    3.5       1507           1522
+## 29           CHIEDOZIE OKORIE    MI    3.5       1602           1314
+## 30         GEORGE AVERY JONES    ON    3.5       1522           1144
+## 31               RISHI SHETTY    MI    3.5       1494           1260
+## 32      JOSHUA PHILIP MATHEWS    ON    3.5       1441           1379
+## 33                    JADE GE    MI    3.5       1449           1277
+## 34     MICHAEL JEFFERY THOMAS    MI    3.5       1399           1375
+## 35           JOSHUA DAVID LEE    MI    3.5       1438           1150
+## 36              SIDDHARTH JHA    MI    3.5       1355           1388
+## 37       AMIYATOSH PWNANANDAM    MI    3.5        980           1385
+## 38                  BRIAN LIU    MI    3.0       1423           1539
+## 39              JOEL R HENDON    MI    3.0       1436           1430
+## 40               FOREST ZHANG    MI    3.0       1348           1391
+## 41        KYLE WILLIAM MURPHY    MI    3.0       1403           1248
+## 42                   JARED GE    MI    3.0       1332           1150
+## 43          ROBERT GLEN VASEY    MI    3.0       1283           1107
+## 44         JUSTIN D SCHILLING    MI    3.0       1199           1327
+## 45                  DEREK YAN    MI    3.0       1242           1152
+## 46   JACOB ALEXANDER LAVALLEY    MI    3.0        377           1358
+## 47                ERIC WRIGHT    MI    2.5       1362           1392
+## 48               DANIEL KHAIN    MI    2.5       1382           1356
+## 49           MICHAEL J MARTIN    MI    2.5       1291           1286
+## 50                 SHIVAM JHA    MI    2.5       1056           1296
+## 51             TEJAS AYYAGARI    MI    2.5       1011           1356
+## 52                  ETHAN GUO    MI    2.5        935           1495
+## 53              JOSE C YBARRA    MI    2.0       1393           1345
+## 54                LARRY HODGE    MI    2.0       1270           1206
+## 55                  ALEX KONG    MI    2.0       1186           1406
+## 56               MARISA RICCI    MI    2.0       1153           1414
+## 57                 MICHAEL LU    MI    2.0       1092           1363
+## 58               VIRAJ MOHILE    MI    2.0        917           1391
+## 59          SEAN M MC CORMICK    MI    2.0        853           1319
+## 60                 JULIA SHEN    MI    1.5        967           1330
+## 61              JEZZEL FARKAS    ON    1.5        955           1327
+## 62              ASHWIN BALAJI    MI    1.0       1530           1186
+## 63       THOMAS JOSEPH HOSMER    MI    1.0       1175           1350
+## 64                     BEN LI    MI    1.0       1163           1263</code></pre>
+<pre class="r"><code>write.csv (final_output,&quot;final_chess_result.csv&quot;, row.names=FALSE)</code></pre>
 </div>
 
 

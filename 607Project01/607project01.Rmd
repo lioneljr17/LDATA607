@@ -20,6 +20,9 @@ date: "2026-09-25"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(readr)
+library(dplyr)
+
 ```
 
 
@@ -51,9 +54,17 @@ players_df <- data.frame(
 )
 
 players_df
+
+lines<- read_lines("tournamentinfo.txt")
+length(lines)
+head(lines,10)
+
+player_lines <- grep("^\\s*[0-9]+\\s*\\|", lines)
+head(player_lines)
 ```
 
-```{r}
+## Testing logic before doing the loops
+```{"testsection"}
 lines<- read_lines("tournamentinfo.txt")
 length(lines)
 head(lines,10)
@@ -139,7 +150,21 @@ players_df <- rbind(players_df, new_player)
 
 head(players_df)
 ```
+
+
 ```{r loops to parse the data }
+
+Extract_opponent <- function(x) {
+
+ num <- gsub("[^0-9]", "", x)
+
+ if (num == "") {
+  return(NA)
+ }
+
+ as.integer(num)
+}
+
 for(i in player_lines){
 
  # First line
