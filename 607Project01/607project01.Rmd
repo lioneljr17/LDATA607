@@ -33,5 +33,250 @@ Once the game table is created, opponent numbers were matched back to the player
 
 One of the main challenges in this project would be that the opponent ratings were not directly available within the game results. Instead, each opponent had to be identified by player number and then matched back to the corresponding player record to obtain their pre-tournament rating.And because the source file is not stored in a traditional tabular format, multiple parsing and data-cleaning steps were required before the information could be transformed into a structured dataset suitable for analysis.
 
+```{r}
+players_df <- data.frame(
+ player_num = integer(),
+ player_name = character(),
+ state = character(),
+ points = numeric(),
+ pre_rating = integer(),
+ r1 = integer(),
+ r2 = integer(),
+ r3 = integer(),
+ r4 = integer(),
+ r5 = integer(),
+ r6 = integer(),
+ r7 = integer(),
+ stringsAsFactors = FALSE
+)
+
+players_df
+```
+
+```{r}
+lines<- read_lines("tournamentinfo.txt")
+length(lines)
+head(lines,10)
 
 
+player_lines <- grep("^\\s*[0-9]+\\s*\\|", lines)
+head(player_lines)
+
+lines[player_lines[1]]
+lines[player_lines[1]+1]
+line1 <- lines[player_lines[1]] 
+
+parts1 <-trimws(strsplit(line1,"\\|")[[1]])
+
+parts1
+
+player_lines
+
+player_num <- as.integer(parts1[1])
+
+player_name <- parts1[2]
+
+points <- as.numeric(parts1[3])
+
+player_num
+player_name
+points
+line2 <- lines[player_lines[1]+1]
+
+line2 
+
+parts2 <- trimws(strsplit(line2,"\\|")[[1]])
+
+parts2
+
+state <- parts2[1]
+state
+
+pre_rating <-as.integer(sub(".*R:\\s*([0-9]+).*","\\1",parts2[2]))
+pre_rating
+
+Extract_opponent <- function(x) {
+
+ num <- gsub("[^0-9]", "", x)
+
+ if (num == "") {
+  return(NA)
+ }
+
+ as.integer(num)
+}
+
+Extract_opponent(parts1[4])
+
+Extract_opponent(parts1[9])
+
+r1 <-Extract_opponent(parts1[4])
+r2 <-Extract_opponent(parts1[5])
+r3 <-Extract_opponent(parts1[6])
+r4 <-Extract_opponent(parts1[7])
+r5 <-Extract_opponent(parts1[8])
+r6 <-Extract_opponent(parts1[9])
+r7 <-Extract_opponent(parts1[10])
+
+new_player <- data.frame(
+ player_num = player_num,
+ player_name = player_name,
+ state = state,
+ points = points,
+ pre_rating = pre_rating,
+ r1 = r1,
+ r2 = r2,
+ r3 = r3,
+ r4 = r4,
+ r5 = r5,
+ r6 = r6,
+ r7 = r7
+)
+
+new_player
+
+players_df <- rbind(players_df, new_player)
+
+head(players_df)
+```
+```{r loops to parse the data }
+for(i in player_lines){
+
+ # First line
+ line1 <- lines[i]
+ parts1 <- trimws(strsplit(line1, "\\|")[[1]])
+
+ # Second line
+ line2 <- lines[i + 1]
+ parts2 <- trimws(strsplit(line2, "\\|")[[1]])
+
+ # Basic fields
+ player_num <- as.integer(parts1[1])
+ player_name <- parts1[2]
+ points <- as.numeric(parts1[3])
+
+ state <- parts2[1]
+
+ pre_rating <- as.integer(
+  sub(".*R:\\s*([0-9]+).*", "\\1", parts2[2])
+ )
+
+ # Opponents
+ r1 <- Extract_opponent(parts1[4])
+ r2 <- Extract_opponent(parts1[5])
+ r3 <- Extract_opponent(parts1[6])
+ r4 <- Extract_opponent(parts1[7])
+ r5 <- Extract_opponent(parts1[8])
+ r6 <- Extract_opponent(parts1[9])
+ r7 <- Extract_opponent(parts1[10])
+
+ # Create row
+ new_player <- data.frame(
+  player_num,
+  player_name,
+  state,
+  points,
+  pre_rating,
+  r1,r2,r3,r4,r5,r6,r7
+ )
+
+ # Add to dataframe
+ players_df <- rbind(players_df, new_player)
+}
+
+write.csv (players_df,"players_table.csv", row.names=FALSE)
+```
+
+```{r game_df}
+games_df <- data.frame(
+ player_num = integer(),
+ round_num = integer(),
+ opponent_num = integer(),
+ stringsAsFactors = FALSE
+)
+
+```
+
+```{r loop to populate the game table}
+for(i in 1:nrow(players_df)) {
+
+ player_id <- players_df$player_num[i]
+
+ for(round in 1:7) {
+
+  opponent <- players_df[i, paste0("r", round)]
+
+  if(!is.na(opponent)) {
+
+   games_df <- rbind(
+    games_df,
+    data.frame(
+     player_num = player_id,
+     round_num = round,
+     opponent_num = opponent
+    )
+   )
+
+  }
+
+ }
+
+}
+
+write.csv (games_df,"gameplayed_table.csv", row.names=FALSE)
+```
+
+```{r calculating avrg}
+ratings_lookup <- players_df %>%
+ select(player_num, pre_rating)
+
+ratings_lookup
+
+games_ratings_df <- games_df %>%
+ left_join(
+  ratings_lookup,
+  by = c("opponent_num" = "player_num")
+ )
+
+games_ratings_df
+
+avg_ratings_df <- games_ratings_df %>%
+ group_by(player_num) %>%
+ summarise(
+  avg_opp_rating = round(mean(pre_rating))
+ )
+
+avg_ratings_df %>%
+ filter(player_num == 1)
+
+
+avg_ratings_df
+```
+```{r result}
+final_df <- players_df %>%
+ select(
+  player_num,
+  player_name,
+  state,
+  points,
+  pre_rating
+ ) %>%
+ left_join(
+  avg_ratings_df,
+  by = "player_num"
+ )
+
+
+final_output <- final_df %>%
+ select(
+  player_name,
+  state,
+  points,
+  pre_rating,
+  avg_opp_rating
+ )
+
+final_output
+
+write.csv (final_output,"final_chess_result.csv", row.names=FALSE)
+```
