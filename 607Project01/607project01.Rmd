@@ -64,11 +64,10 @@ head(player_lines)
 ```
 
 ## Testing logic before doing the loops
-```{"testsection"}
+```{"testsection - not code, nothing is being build in this chunck"}
 lines<- read_lines("tournamentinfo.txt")
 length(lines)
 head(lines,10)
-
 
 player_lines <- grep("^\\s*[0-9]+\\s*\\|", lines)
 head(player_lines)
@@ -78,26 +77,20 @@ lines[player_lines[1]+1]
 line1 <- lines[player_lines[1]] 
 
 parts1 <-trimws(strsplit(line1,"\\|")[[1]])
-
 parts1
-
 player_lines
 
 player_num <- as.integer(parts1[1])
-
 player_name <- parts1[2]
-
 points <- as.numeric(parts1[3])
 
 player_num
 player_name
 points
 line2 <- lines[player_lines[1]+1]
-
 line2 
 
 parts2 <- trimws(strsplit(line2,"\\|")[[1]])
-
 parts2
 
 state <- parts2[1]
@@ -107,18 +100,14 @@ pre_rating <-as.integer(sub(".*R:\\s*([0-9]+).*","\\1",parts2[2]))
 pre_rating
 
 Extract_opponent <- function(x) {
-
  num <- gsub("[^0-9]", "", x)
-
  if (num == "") {
   return(NA)
  }
-
  as.integer(num)
 }
 
 Extract_opponent(parts1[4])
-
 Extract_opponent(parts1[9])
 
 r1 <-Extract_opponent(parts1[4])
@@ -145,9 +134,7 @@ new_player <- data.frame(
 )
 
 new_player
-
 players_df <- rbind(players_df, new_player)
-
 head(players_df)
 ```
 
@@ -164,6 +151,7 @@ Extract_opponent <- function(x) {
 
  as.integer(num)
 }
+
 
 for(i in player_lines){
 
@@ -255,7 +243,7 @@ write.csv (games_df,"gameplayed_table.csv", row.names=FALSE)
 ratings_lookup <- players_df %>%
  select(player_num, pre_rating)
 
-ratings_lookup
+head(ratings_lookup,10)
 
 games_ratings_df <- games_df %>%
  left_join(
@@ -263,7 +251,7 @@ games_ratings_df <- games_df %>%
   by = c("opponent_num" = "player_num")
  )
 
-games_ratings_df
+head(games_ratings_df, 5)
 
 avg_ratings_df <- games_ratings_df %>%
  group_by(player_num) %>%
