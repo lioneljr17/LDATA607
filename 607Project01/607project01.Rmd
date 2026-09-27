@@ -332,3 +332,19 @@ The final dataset contains each player's name, state, total points, pre-tourname
 
 ### Conclusion
 This project demonstrated how semi-structured text data can be transformed into a structured dataset using parsing, data cleaning, and relational-style joins. By creating player and game tables, it was possible to calculate the average pre-tournament rating of each player's opponents and generate the required CSV output. The project highlights the importance of data wrangling techniques when working with non-tabular source data and shows how relational concepts can be applied to solve real-world data processing problems.
+
+
+
+
+
+
+
+## AI Usage Statement
+I prompted copilot to write an paragraphs of a summary of all the questions I ask to complete this assignment.
+and this was the output. 
+
+Microsoft Copilot was used as a learning and coding assistant during this project. It was used to help explain concepts, review code logic, and discuss approaches for solving the assignment. All code was reviewed, tested, and modified by the author, who remains responsible for the final implementation and analysis.
+
+### Reference
+
+Microsoft. (2026). Microsoft Copilot (AI-powered assistant based on GPT technology). Retrieved September 26, 2026, from Microsoft Copilot
