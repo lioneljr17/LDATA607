@@ -15,7 +15,7 @@ format:
     df-print: paged
     smooth-scroll: true
     embed-resources: true
-date: "2026-09-25"
+date: "2026-09-26"
 ---
 
 ```{r setup, include=FALSE}
@@ -30,13 +30,13 @@ library(dplyr)
 This project is about transforming a semi-structured chess tournament text file into a clean and organized dataset that can be analyzed and exported as a CSV file. The tournament file contains information about each player, including their name, state, total points earned, pre-tournament rating, and the opponents they faced throughout the tournament.The goal of the project is to extract the required information for each player and calculate the average pre-tournament rating of all opponents they played against. Since the opponent ratings are not directly provided with each game result, additional processing is required to identify each opponent and retrieve their corresponding pre-tournament rating from the tournament data.Although the source file follows a consistent format, the data is spread across multiple lines and contains game results embedded within text fields. Therefore, much of the work in this project involves parsing, cleaning, and restructuring the data before performing the final calculations.
 
 ## Approach
-
 My approach for this project is to treat the tournament data similarly to a relational database. First, I will create a player table containing one record per player, including their player number, name, state, total points, pre-tournament rating, and opponent numbers for each round.Then I would generated a game table by iterating through the round information for each player and extracting valid opponent numbers. This produced a table containing the player number, round number, and opponent number for every recorded game. Rounds containing no number or played game value were excluded because they do not represent games against actual opponents.
 Once the game table is created, opponent numbers were matched back to the player table to retrieve the opponents' pre-tournament ratings. These ratings is the averaged for each player to produce the required average opponent rating value.
 
-One of the main challenges in this project would be that the opponent ratings were not directly available within the game results. Instead, each opponent had to be identified by player number and then matched back to the corresponding player record to obtain their pre-tournament rating.And because the source file is not stored in a traditional tabular format, multiple parsing and data-cleaning steps were required before the information could be transformed into a structured dataset suitable for analysis.
+## Creating the Player Table
 
-```{r}
+The first step from my approach was to create an empty dataframe that would store the information extracted from the tournament file. The dataframe was designed to hold one record per player, including the player number, player name, state, total points earned, pre-tournament rating, and the opponent number for each of the seven rounds. This structure serves as the foundation for the remainder of the analysis.
+```{r Creating the Player Table}
 players_df <- data.frame(
  player_num = integer(),
  player_name = character(),
@@ -54,7 +54,13 @@ players_df <- data.frame(
 )
 
 players_df
+```
 
+## Reading and Preparing the Tournament Data
+
+The tournament results were provided in a text file rather than a traditional tabular format. To begin the parsing process, the file was read into R as a collection of text lines. Regular expressions were then used to identify the starting line for each player's record, which allowed the data to be processed systematically.
+
+```{r preparing tournamnet data }
 lines<- read_lines("tournamentinfo.txt")
 length(lines)
 head(lines,10)
@@ -64,7 +70,11 @@ head(player_lines)
 ```
 
 ## Testing logic before doing the loops
-```{"testsection - not code, nothing is being build in this chunck"}
+
+Before processing the entire file, the parsing logic was tested using the first player record. This validation step ensured that player information, state, pre-tournament rating, total points, and opponent numbers could be extracted correctly. Once the logic was verified, it was incorporated into a loop to process all players automatically.
+
+```{r, eval = FALSE}
+"testsection - not code, nothing is this section is being build" 
 lines<- read_lines("tournamentinfo.txt")
 length(lines)
 head(lines,10)
@@ -139,6 +149,11 @@ head(players_df)
 ```
 
 
+
+## Parsing and Building the Player Table
+
+After validating the extraction logic, a loop was used to process every player in the tournament file. Each player's information was extracted from the corresponding two-line record and added to the player table. During this step, opponent numbers from each round were also captured and stored for later analysis.
+
 ```{r loops to parse the data }
 
 Extract_opponent <- function(x) {
@@ -198,7 +213,12 @@ for(i in player_lines){
 }
 
 write.csv (players_df,"players_table.csv", row.names=FALSE)
+
 ```
+
+## Creating the Game Table
+
+To simplify the calculation of opponent statistics, a separate game table was created. This table stores one record for each player-opponent matchup and contains the player number, round number, and opponent number. Converting the round information into this format makes it easier to perform relational-style joins and calculations.
 
 ```{r game_df}
 games_df <- data.frame(
@@ -209,6 +229,10 @@ games_df <- data.frame(
 )
 
 ```
+
+## Populating the Game Table
+
+The game table was populated by iterating through each player's round information. For every valid opponent number found, a new game record was created containing the player number, round number, and opponent number. Rounds without a valid opponent were excluded because they do not contribute to the average opponent rating calculation.
 
 ```{r loop to populate the game table}
 for(i in 1:nrow(players_df)) {
@@ -239,6 +263,10 @@ for(i in 1:nrow(players_df)) {
 write.csv (games_df,"gameplayed_table.csv", row.names=FALSE)
 ```
 
+## Calculating Average Opponent Ratings
+
+The assignment requires calculating the average pre-tournament rating of each player's opponents. To accomplish this, the game table was joined back to the player table using the opponent number as a lookup key. This allowed each opponent's pre-tournament rating to be retrieved. The ratings were then grouped by player and averaged to produce the required statistic.
+
 ```{r calculating avrg}
 ratings_lookup <- players_df %>%
  select(player_num, pre_rating)
@@ -265,6 +293,11 @@ avg_ratings_df %>%
 
 avg_ratings_df
 ```
+
+## Creating the Final Output
+
+The final step was to combine the calculated average opponent ratings with the player information. The resulting dataset contains the player's name, state, total points, pre-tournament rating, and average opponent pre-tournament rating. This dataset was then exported as a CSV file to satisfy the project requirements.
+
 ```{r result}
 final_df <- players_df %>%
  select(
@@ -293,3 +326,9 @@ final_output
 
 write.csv (final_output,"final_chess_result.csv", row.names=FALSE)
 ```
+## Results
+
+The final dataset contains each player's name, state, total points, pre-tournament rating, and average opponent pre-tournament rating. The tournament data was successfully parsed, transformed into structured tables, and exported as a CSV file. The calculated results matched the example provided in the assignment, including an average opponent rating of 1605 for Gary Hua.
+
+### Conclusion
+This project demonstrated how semi-structured text data can be transformed into a structured dataset using parsing, data cleaning, and relational-style joins. By creating player and game tables, it was possible to calculate the average pre-tournament rating of each player's opponents and generate the required CSV output. The project highlights the importance of data wrangling techniques when working with non-tabular source data and shows how relational concepts can be applied to solve real-world data processing problems.

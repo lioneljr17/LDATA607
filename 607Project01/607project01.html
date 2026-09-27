@@ -11,7 +11,7 @@
 
 <meta name="author" content="Lionel jr. desroses" />
 
-<meta name="date" content="2026-09-25" />
+<meta name="date" content="2026-09-26" />
 
 <title>DATA 607 project01:Chess Tournament Data Analysis</title>
 
@@ -353,7 +353,7 @@ display: none;
 <h1 class="title toc-ignore">DATA 607 project01:Chess Tournament Data
 Analysis</h1>
 <h4 class="author">Lionel jr. desroses</h4>
-<h4 class="date">2026-09-25</h4>
+<h4 class="date">2026-09-26</h4>
 
 </div>
 
@@ -391,14 +391,16 @@ against actual opponents. Once the game table is created, opponent
 numbers were matched back to the player table to retrieve the opponents’
 pre-tournament ratings. These ratings is the averaged for each player to
 produce the required average opponent rating value.</p>
-<p>One of the main challenges in this project would be that the opponent
-ratings were not directly available within the game results. Instead,
-each opponent had to be identified by player number and then matched
-back to the corresponding player record to obtain their pre-tournament
-rating.And because the source file is not stored in a traditional
-tabular format, multiple parsing and data-cleaning steps were required
-before the information could be transformed into a structured dataset
-suitable for analysis.</p>
+</div>
+<div id="creating-the-player-table" class="section level2">
+<h2>Creating the Player Table</h2>
+<p>The first step from my approach was to create an empty dataframe that
+would store the information extracted from the tournament file. The
+dataframe was designed to hold one record per player, including the
+player number, player name, state, total points earned, pre-tournament
+rating, and the opponent number for each of the seven rounds. This
+structure serves as the foundation for the remainder of the
+analysis.</p>
 <pre class="r"><code>players_df &lt;- data.frame(
  player_num = integer(),
  player_name = character(),
@@ -419,6 +421,14 @@ players_df</code></pre>
 <pre><code>##  [1] player_num  player_name state       points      pre_rating  r1         
 ##  [7] r2          r3          r4          r5          r6          r7         
 ## &lt;0 rows&gt; (or 0-length row.names)</code></pre>
+</div>
+<div id="reading-and-preparing-the-tournament-data" class="section level2">
+<h2>Reading and Preparing the Tournament Data</h2>
+<p>The tournament results were provided in a text file rather than a
+traditional tabular format. To begin the parsing process, the file was
+read into R as a collection of text lines. Regular expressions were then
+used to identify the starting line for each player’s record, which
+allowed the data to be processed systematically.</p>
 <pre class="r"><code>lines&lt;- read_lines(&quot;tournamentinfo.txt&quot;)
 length(lines)</code></pre>
 <pre><code>## [1] 196</code></pre>
@@ -439,41 +449,92 @@ head(player_lines)</code></pre>
 </div>
 <div id="testing-logic-before-doing-the-loops" class="section level2">
 <h2>Testing logic before doing the loops</h2>
-<p>```{“testsection - not code, nothing is being build in this chunck”}
-lines&lt;- read_lines(“tournamentinfo.txt”) length(lines)
-head(lines,10)</p>
-<p>player_lines &lt;- grep(“^\s<em>[0-9]+\s</em>\|”, lines)
-head(player_lines)</p>
-<p>lines[player_lines[1]] lines[player_lines[1]+1] line1 &lt;-
-lines[player_lines[1]]</p>
-<p>parts1 &lt;-trimws(strsplit(line1,“\|”)[[1]]) parts1 player_lines</p>
-<p>player_num &lt;- as.integer(parts1[1]) player_name &lt;- parts1[2]
-points &lt;- as.numeric(parts1[3])</p>
-<p>player_num player_name points line2 &lt;- lines[player_lines[1]+1]
-line2</p>
-<p>parts2 &lt;- trimws(strsplit(line2,“\|”)[[1]]) parts2</p>
-<p>state &lt;- parts2[1] state</p>
-<p>pre_rating
-&lt;-as.integer(sub(“.<em>R:\s</em>([0-9]+).*“,”\1”,parts2[2]))
-pre_rating</p>
-<p>Extract_opponent &lt;- function(x) { num &lt;- gsub(“[^0-9]”, ““, x)
-if (num ==”“) { return(NA) } as.integer(num) }</p>
-<p>Extract_opponent(parts1[4]) Extract_opponent(parts1[9])</p>
-<p>r1 &lt;-Extract_opponent(parts1[4]) r2
-&lt;-Extract_opponent(parts1[5]) r3 &lt;-Extract_opponent(parts1[6]) r4
-&lt;-Extract_opponent(parts1[7]) r5 &lt;-Extract_opponent(parts1[8]) r6
-&lt;-Extract_opponent(parts1[9]) r7
-&lt;-Extract_opponent(parts1[10])</p>
-<p>new_player &lt;- data.frame( player_num = player_num, player_name =
-player_name, state = state, points = points, pre_rating = pre_rating, r1
-= r1, r2 = r2, r3 = r3, r4 = r4, r5 = r5, r6 = r6, r7 = r7 )</p>
-<p>new_player players_df &lt;- rbind(players_df, new_player)
-head(players_df)</p>
-<pre><code>
+<p>Before processing the entire file, the parsing logic was tested using
+the first player record. This validation step ensured that player
+information, state, pre-tournament rating, total points, and opponent
+numbers could be extracted correctly. Once the logic was verified, it
+was incorporated into a loop to process all players automatically.</p>
+<pre class="r"><code>&quot;testsection - not code, nothing is this section is being build&quot; 
+lines&lt;- read_lines(&quot;tournamentinfo.txt&quot;)
+length(lines)
+head(lines,10)
 
+player_lines &lt;- grep(&quot;^\\s*[0-9]+\\s*\\|&quot;, lines)
+head(player_lines)
 
-``` r
+lines[player_lines[1]]
+lines[player_lines[1]+1]
+line1 &lt;- lines[player_lines[1]] 
+
+parts1 &lt;-trimws(strsplit(line1,&quot;\\|&quot;)[[1]])
+parts1
+player_lines
+
+player_num &lt;- as.integer(parts1[1])
+player_name &lt;- parts1[2]
+points &lt;- as.numeric(parts1[3])
+
+player_num
+player_name
+points
+line2 &lt;- lines[player_lines[1]+1]
+line2 
+
+parts2 &lt;- trimws(strsplit(line2,&quot;\\|&quot;)[[1]])
+parts2
+
+state &lt;- parts2[1]
+state
+
+pre_rating &lt;-as.integer(sub(&quot;.*R:\\s*([0-9]+).*&quot;,&quot;\\1&quot;,parts2[2]))
+pre_rating
+
 Extract_opponent &lt;- function(x) {
+ num &lt;- gsub(&quot;[^0-9]&quot;, &quot;&quot;, x)
+ if (num == &quot;&quot;) {
+  return(NA)
+ }
+ as.integer(num)
+}
+
+Extract_opponent(parts1[4])
+Extract_opponent(parts1[9])
+
+r1 &lt;-Extract_opponent(parts1[4])
+r2 &lt;-Extract_opponent(parts1[5])
+r3 &lt;-Extract_opponent(parts1[6])
+r4 &lt;-Extract_opponent(parts1[7])
+r5 &lt;-Extract_opponent(parts1[8])
+r6 &lt;-Extract_opponent(parts1[9])
+r7 &lt;-Extract_opponent(parts1[10])
+
+new_player &lt;- data.frame(
+ player_num = player_num,
+ player_name = player_name,
+ state = state,
+ points = points,
+ pre_rating = pre_rating,
+ r1 = r1,
+ r2 = r2,
+ r3 = r3,
+ r4 = r4,
+ r5 = r5,
+ r6 = r6,
+ r7 = r7
+)
+
+new_player
+players_df &lt;- rbind(players_df, new_player)
+head(players_df)</code></pre>
+</div>
+<div id="parsing-and-building-the-player-table" class="section level2">
+<h2>Parsing and Building the Player Table</h2>
+<p>After validating the extraction logic, a loop was used to process
+every player in the tournament file. Each player’s information was
+extracted from the corresponding two-line record and added to the player
+table. During this step, opponent numbers from each round were also
+captured and stored for later analysis.</p>
+<pre class="r"><code>Extract_opponent &lt;- function(x) {
 
  num &lt;- gsub(&quot;[^0-9]&quot;, &quot;&quot;, x)
 
@@ -530,12 +591,28 @@ for(i in player_lines){
 }
 
 write.csv (players_df,&quot;players_table.csv&quot;, row.names=FALSE)</code></pre>
+</div>
+<div id="creating-the-game-table" class="section level2">
+<h2>Creating the Game Table</h2>
+<p>To simplify the calculation of opponent statistics, a separate game
+table was created. This table stores one record for each player-opponent
+matchup and contains the player number, round number, and opponent
+number. Converting the round information into this format makes it
+easier to perform relational-style joins and calculations.</p>
 <pre class="r"><code>games_df &lt;- data.frame(
  player_num = integer(),
  round_num = integer(),
  opponent_num = integer(),
  stringsAsFactors = FALSE
 )</code></pre>
+</div>
+<div id="populating-the-game-table" class="section level2">
+<h2>Populating the Game Table</h2>
+<p>The game table was populated by iterating through each player’s round
+information. For every valid opponent number found, a new game record
+was created containing the player number, round number, and opponent
+number. Rounds without a valid opponent were excluded because they do
+not contribute to the average opponent rating calculation.</p>
 <pre class="r"><code>for(i in 1:nrow(players_df)) {
 
  player_id &lt;- players_df$player_num[i]
@@ -562,6 +639,15 @@ write.csv (players_df,&quot;players_table.csv&quot;, row.names=FALSE)</code></pr
 }
 
 write.csv (games_df,&quot;gameplayed_table.csv&quot;, row.names=FALSE)</code></pre>
+</div>
+<div id="calculating-average-opponent-ratings" class="section level2">
+<h2>Calculating Average Opponent Ratings</h2>
+<p>The assignment requires calculating the average pre-tournament rating
+of each player’s opponents. To accomplish this, the game table was
+joined back to the player table using the opponent number as a lookup
+key. This allowed each opponent’s pre-tournament rating to be retrieved.
+The ratings were then grouped by player and averaged to produce the
+required statistic.</p>
 <pre class="r"><code>ratings_lookup &lt;- players_df %&gt;%
  select(player_num, pre_rating)
 
@@ -617,6 +703,14 @@ avg_ratings_df %&gt;%
 ##  9          9           1523
 ## 10         10           1554
 ## # ℹ 54 more rows</code></pre>
+</div>
+<div id="creating-the-final-output" class="section level2">
+<h2>Creating the Final Output</h2>
+<p>The final step was to combine the calculated average opponent ratings
+with the player information. The resulting dataset contains the player’s
+name, state, total points, pre-tournament rating, and average opponent
+pre-tournament rating. This dataset was then exported as a CSV file to
+satisfy the project requirements.</p>
 <pre class="r"><code>final_df &lt;- players_df %&gt;%
  select(
   player_num,
@@ -707,6 +801,26 @@ final_output</code></pre>
 ## 63       THOMAS JOSEPH HOSMER    MI    1.0       1175           1350
 ## 64                     BEN LI    MI    1.0       1163           1263</code></pre>
 <pre class="r"><code>write.csv (final_output,&quot;final_chess_result.csv&quot;, row.names=FALSE)</code></pre>
+</div>
+<div id="results" class="section level2">
+<h2>Results</h2>
+<p>The final dataset contains each player’s name, state, total points,
+pre-tournament rating, and average opponent pre-tournament rating. The
+tournament data was successfully parsed, transformed into structured
+tables, and exported as a CSV file. The calculated results matched the
+example provided in the assignment, including an average opponent rating
+of 1605 for Gary Hua.</p>
+<div id="conclusion" class="section level3">
+<h3>Conclusion</h3>
+<p>This project demonstrated how semi-structured text data can be
+transformed into a structured dataset using parsing, data cleaning, and
+relational-style joins. By creating player and game tables, it was
+possible to calculate the average pre-tournament rating of each player’s
+opponents and generate the required CSV output. The project highlights
+the importance of data wrangling techniques when working with
+non-tabular source data and shows how relational concepts can be applied
+to solve real-world data processing problems.</p>
+</div>
 </div>
 
 
