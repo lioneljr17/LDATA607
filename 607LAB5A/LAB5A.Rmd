@@ -1,0 +1,34 @@
+---
+title: "DATA 607 assignment 5A:Airline Delays"
+author: "Lionel jr. desroses"
+output: html_document
+editor: visual
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    code-tools: true
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+date: "2026-09-17"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Introduction
+
+For this assignment, I will analyze airline arrival performance data for Alaska Airlines and AmWest across five destinations. The data is currently presented in a wide format, so my first step will be to recreate the table as a CSV file and upload it to GitHub. After importing the data into R, I will use the tidyr and dplyr packages to transform the dataset into a tidy format for easier analysis.Once the data has been cleaned and organized, I will calculate delay and on-time percentages for each airline. I will compare the airlines both overall and by individual city to determine which airline has the better arrival performance. I also plan to create tables and visualizations to help illustrate the results and identify any patterns in the data.
+
+My approach for this assignments is to first create a CSV file from the airline delay data provided, and then I will recreate the table in the same format as shown, including all airlines, destinations, and arrival status counts.
+After creating the CSV file, I will upload it to my GitHub repository so that the data file is stored in an accessible location and can be referenced in my project.
+Next, I will import the CSV file into R and examine the dataset's structure. Once the data has been loaded, I will use the tidyr and dplyr packages to clean and transform the data. Specifically, I will convert the dataset from a wide format into a tidy long format using pivot_longer, making it easier to analyze.After tidying the data, I will calculate the total number of flights, delayed flights, and on-time flights for each airline. I will then compute delay percentages and compare the overall performance of Alaska Airlines and AmWest.
+Following the overall comparison, I will analyze the delay percentages for each destination city to assess how the airlines perform at each location. To better present the results, I will create tables and visualizations showing the delay rates by airline and destination. And then I will summarize my findings and discuss any differences between the overall airline performance and the city-by-city results. I will explain why these differences occur and what they reveal about the data. Once the analysis is complete, I will publish the R Markdown file to RPubs and provide links to both my GitHub repository and RPubs submission.
+
+One challenge I anticipate is correctly transforming the data from its original wide format to a tidy long format while preserving the relationships among airlines, flight status, and destinations. Another challenge may be interpreting the results if the overall airline rankings differ from the city-by-city comparisons, since this requires careful analysis of percentages rather than simply comparing raw counts.
