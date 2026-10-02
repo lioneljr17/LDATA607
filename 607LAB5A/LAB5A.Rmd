@@ -15,7 +15,7 @@ format:
     df-print: paged
     smooth-scroll: true
     embed-resources: true
-date: "2026-09-17"
+date: "2026-10-01"
 ---
 
 ```{r setup, include=FALSE}
