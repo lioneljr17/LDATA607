@@ -1,0 +1,33 @@
+---
+title: "DATA 607 assignment 5A:ELO Calculations"
+author: "Lionel jr. desroses"
+output: html_document
+editor: visual
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    code-tools: true
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+date: "2026-10-01"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+For this project, I will use the Elo rating system (learn the Elo rating system ) to compare each player's actual tournament performance with their expected performance. The goal is to calculate an expected score for every player based on the ratings of the opponents they faced during the tournament. After finding each player's expected score, I will compare it to their actual score to determine whether they overperformed or underperformed relative to expectations. Finally, I will identify the five players who exceeded expectations the most and the five who performed below expectations the most.
+
+## Approach
+
+To complete this assignment, I will begin by using the player ratings and opponent information from the chess tournament dataset created in Project 1. For each match, I will apply the Elo expected score formula to calculate the probability that a player will score against a specific opponent. I will then sum the expected scores across all opponents to obtain each player's total expected tournament score. Next, I will compare the expected score to the player's actual score and calculate the difference. Positive differences will indicate overperformance, while negative differences will indicate underperformance. Lastly, I will sort the results to identify the top five overperformers and underperformers.
+
+One challenge I anticipate is matching each player with the ratings of all their opponents. While the Elo formula itself is straightforward, obtaining the correct opponent ratings and linking them to each player's tournament record may require additional data manipulation and joins. Ensuring that all opponent ratings are correctly associated with the appropriate player will be important for producing accurate expected score calculations.
