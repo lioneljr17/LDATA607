@@ -40,12 +40,20 @@ Following the overall comparison, I will analyze the delay percentages for each 
 
 One challenge I anticipate is correctly transforming the data from its original wide format to a tidy long format while preserving the relationships among airlines, flight status, and destinations. Another challenge may be interpreting the results if the overall airline rankings differ from the city-by-city comparisons, since this requires careful analysis of percentages rather than simply comparing raw counts.
 
+## Original structure
+
+The original dataset is stored in a wide format. Each row represents an airline-arrival-status combination, while each city is represented by a separate column. Although this format is easy for humans to read, it is not ideal for analysis because city names are stored as column headers rather than observations.
+
 ```{r imported }
 library(readr)
 airline <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607LAB5A/airline_table.csv")
 View(airline)
 
 ```
+
+## tarnforming wide to long
+
+To create a tidy dataset, I used the pivot_longer() function from the tidyr package. This transformation converts the city columns into a single City variable and places the corresponding counts into a Count variable. The resulting dataset contains one observation per row and is easier to summarize and visualize.
 
 ```{r tarnforming wide to long}
 airline_long <- airline %>%
@@ -56,6 +64,7 @@ airline_long <- airline %>%
 airline_long
 
 ```
+
 
 ```{r delay percentages per city}
 city_summary <- airline_long %>%
@@ -90,3 +99,7 @@ ggplot(city_summary,aes(x =city,y=DelayedRate, fill = Airline))+
        x ="Destination",
        y ="Delay Percentage")+ theme_minimal()
 ```
+
+## conclusion
+
+In conclusion, Alaska Airlines has a lower delay percentage than AmWest in each individual destination city. However, when all destinations are combined, AmWest appears to have a lower overall delay rate. This occurs because the airlines operate different numbers of flights to different destinations. The dataset demonstrates Simpson's Paradox, where trends observed in separate groups can reverse when the groups are combined. This example highlights the importance of examining subgroup data rather than relying solely on overall summary statistics.
