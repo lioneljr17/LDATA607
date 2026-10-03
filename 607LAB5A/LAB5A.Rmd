@@ -25,6 +25,8 @@ library(dplyr)
 library(ggplot2)
 library(readr)
 library(slider)
+
+theme_minimal()
 ```
 
 ##Introduction
@@ -60,8 +62,8 @@ city_summary <- airline_long %>%
   group_by(Airline,city)%>%
   summarize (
     total = sum(Count),
-    Delayed = Count[Status =="delayed"],
-    DelayedRate = round((Delayed/total)*100,2),
+    Delayed = Count[Status =="Delayed"],
+    DelayedRate = round(100*Delayed/total,2),
     .groups ="drop"
   )
 
@@ -73,8 +75,18 @@ overall_summary <- airline_long %>%
   group_by(Airline,city)%>%
   summarize (
     total = sum(Count),
-    Delayed = Count[Status =="delayed"],
-    DelayedRate = round((Delayed/total)*100,2),
+    Delayed = Count[Status =="Delayed"],
+    DelayedRate = round(100*Delayed/total,2),
     .groups ="drop"
   )
+names(airline_long)
+head(airline_long)
+unique(airline_long$Status)
+```
+```{r plot}
+ggplot(city_summary,aes(x =city,y=DelayedRate, fill = Airline))+
+  geom_col(position ="dodge")+ 
+  labs(title = "delay Percentages by Airline and City", 
+       x ="Destination",
+       y ="Delay Percentage")+ theme_minimal()
 ```
