@@ -20,6 +20,11 @@ date: "2026-10-01"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(slider)
 ```
 
 ## Introduction
@@ -31,3 +36,171 @@ For this project, I will use the Elo rating system (learn the Elo rating system 
 To complete this assignment, I will begin by using the player ratings and opponent information from the chess tournament dataset created in Project 1. For each match, I will apply the Elo expected score formula to calculate the probability that a player will score against a specific opponent. I will then sum the expected scores across all opponents to obtain each player's total expected tournament score. Next, I will compare the expected score to the player's actual score and calculate the difference. Positive differences will indicate overperformance, while negative differences will indicate underperformance. Lastly, I will sort the results to identify the top five overperformers and underperformers.
 
 One challenge I anticipate is matching each player with the ratings of all their opponents. While the Elo formula itself is straightforward, obtaining the correct opponent ratings and linking them to each player's tournament record may require additional data manipulation and joins. Ensuring that all opponent ratings are correctly associated with the appropriate player will be important for producing accurate expected score calculations.
+
+
+```{r loding the data}
+library(readr)
+players_df <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607Project01/players_table.csv")
+head(players_df)
+
+gameplayed_table <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607Project01/gameplayed_table.csv")
+
+head(gameplayed_table,10)
+
+```
+# review ELO formila 
+
+$E_O = \frac{1}{1 + 10^{(R_oop - R_player /400)}}$ 
+
+```{r ELO }
+expected_score <- function (player_rating, 
+                            opponent_rating){1/(1+10^((opponent_rating - player_rating)/400))}
+```
+
+```{r}
+games_elo <- gameplayed_table %>%
+ left_join(
+  players_df %>%
+   select(player_num,
+       pre_rating),
+  by = "player_num"
+ ) %>%
+ rename(player_rating = pre_rating)
+
+view(games_elo)
+```
+
+```{r }
+games_elo <- games_elo %>%
+ left_join(
+  players_df %>%
+   select(player_num,
+       pre_rating),
+  by = c("opponent_num" = "player_num")
+ ) %>%
+ rename(opponent_rating = pre_rating)
+
+
+
+```
+
+```{r}
+games_elo <- games_elo %>%
+ mutate(
+  expected_game =
+   expected_score(
+    player_rating,
+    opponent_rating
+   )
+ )
+```
+
+##  Calculate Expected Tournament Scores
+```{r}
+expected_totals <- games_elo %>%
+ group_by(player_num) %>%
+ summarise(
+  expected_score =
+   sum(expected_game,
+     na.rm = TRUE)
+ )
+head(expected_totals)
+```
+
+```{r}
+results <- players_df %>%
+ left_join(
+  expected_totals,
+  by = "player_num"
+ ) %>%
+ mutate(
+  difference =
+   points - expected_score
+ )
+```
+
+```{r}
+final_results <- results %>%
+ select(
+  player_name,
+  points,
+  pre_rating,
+  expected_score,
+  difference
+ )
+head(final_results)
+
+```
+
+```{r}
+top_overperformers <- final_results %>%
+ arrange(desc(difference)) %>%
+ slice(1:5)
+
+head(top_overperformers,10)
+```
+
+```{r}
+top_underperformers <- final_results %>%
+ arrange(difference) %>%
+ slice(1:5)
+
+head(top_underperformers,10)
+```
+
+```{r}
+ggplot(
+ final_results,
+ aes(
+  x = reorder(player_name,
+        difference),
+  y = difference
+ )
+) +
+ geom_col() +
+ coord_flip() +
+ labs(
+  title = "Difference Between Actual and Expected Scores",
+  x = "Player",
+  y = "Actual - Expected"
+ )
+```
+
+```{r}
+top_overperformers %>%
+ ggplot(
+  aes(
+   x = reorder(player_name, difference),
+   y = difference
+  )
+ ) +
+ geom_col(fill = "steelblue") +
+ coord_flip() +
+ labs(
+  title = "Top 5 Overperformers",
+  x = "Player",
+  y = "Actual - Expected"
+ ) +
+ theme_minimal()
+
+
+#Top 5 Underperformers
+top_underperformers %>%
+ ggplot(
+  aes(
+   x = reorder(player_name, difference),
+   y = difference
+  )
+ ) +
+ geom_col(fill = "firebrick") +
+ coord_flip() +
+ labs(
+  title = "Top 5 Underperformers",
+  x = "Player",
+  y = "Actual - Expected"
+ ) +
+ theme_minimal()
+```
+##Conclusion
+
+The Elo rating system provides a way to estimate how many points a player should score based on the ratings of their opponents. By comparing expected scores to actual tournament results, it is possible to identify players who performed significantly above or below expectations. The analysis highlights the top five overperformers and underperformers, providing insight into which players achieved results that differed most from what the Elo system predicted.
