@@ -1,8 +1,7 @@
 ---
 title: "Project 2 — Data Tidying"
 author: "Lionel jr. desroses"
-output: html_document
-editor: visual
+date: "2026-10-10"
   html:
     theme: cosmo
     toc: true
@@ -14,7 +13,9 @@ editor: visual
     df-print: paged
     smooth-scroll: true
     embed-resources: true
-date: "2026-10-01"
+execute:
+  warning: false
+  message: false
 ---
 
 **Introduction**
@@ -59,15 +60,18 @@ One challenge will be ensuring that all three datasets use a consistent state id
 
 ## Running Code
 
-When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
-
 ```{r}
 library(tidyverse)
 library(tidyr)
 library(dplyr)
 library(ggplot2)
+library(tibble)
 
 ```
+
+## **Dataset 1: High School Graduation Rates**
+
+The original graduation-rate dataset was stored in a wide format where states appeared as column names and graduation years appeared as rows. This structure made analysis difficult because years were stored as observations rather than variables. To create a tidy dataset, the data was first transposed so that each state became a row and each graduation year became a column. The dataset was then reshaped into a long format using pivot_longer(), producing one row per state-year combination.
 
 ```{r importing data set }
 
@@ -165,7 +169,7 @@ ggplot(
   )
 ```
 
-**Dataset 2: SAT Scores**
+## **Dataset 2: SAT Scores**
 
 The SAT dataset was also provided in a wide format where states were stored as columns and SAT measures were stored as rows. The dataset was transposed so that each state became an observation. The resulting dataset was then converted into a tidy format where SAT metrics and values were represented consistently.
 
@@ -173,6 +177,7 @@ The SAT dataset was also provided in a wide format where states were stored as c
 library(readr)
 SAT_score <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/Project2/SAT_score.csv")
 #View(SAT_score)
+head(SAT_score)
 
 
 
@@ -270,13 +275,16 @@ ggplot(
   )
 ```
 
-**Dataset 3: School Funding**
+## **Dataset 3: School Funding** 
+
 The education funding dataset contained states as columns and funding categories as rows. Similar to the previous datasets, the data was transposed so that states became observations. The funding measures were then standardized and converted to numeric values after removing currency symbols.
 
 ```{r importing 3 dataset }
 library(readr)
 states_school_funding <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/Project2/states_school_funding.csv")
-View(states_school_funding)
+#View(states_school_funding)
+
+head(states_school_funding)
 ```
 
 ```{r}
@@ -364,7 +372,7 @@ ggplot(
   )
 ```
 
-**Final Combined Analysis**
+## **Final Combined Analysis**
 
 ```{r}
 combined_data <- grad_clean %>%
@@ -480,29 +488,40 @@ ggplot(
 ```
 
 ```{r}
-combined_long <- combined_data %>%
+combined_scaled <- combined_data %>%
+  mutate(
+    graduation_scaled =
+      scale(highschool_2024)[,1],
+    sat_scaled =
+      scale(total_mean_score)[,1],
+    funding_scaled =
+      scale(total_budget)[,1]
+  )
+
+
+  combined_scaled_long <- combined_scaled %>%
+  select(
+    state,
+    graduation_scaled,
+    sat_scaled,
+    funding_scaled
+  ) %>%
   pivot_longer(
-    cols = c(
-      highschool_2024,
-      total_mean_score,
-      total_budget
-    ),
+    -state,
     names_to = "metric",
     values_to = "value"
   )
 
-
+  
   ggplot(
-    combined_long,
+    combined_scaled_long,
     aes(
       state,
       value,
       fill = metric
     )
   ) +
-  geom_col(
-    position = "dodge"
-  ) +
+  geom_col(position = "dodge") +
   theme(
     axis.text.x =
       element_text(
@@ -511,8 +530,14 @@ combined_long <- combined_data %>%
       )
   ) +
   labs(
-    title = "Comparison of Graduation Rates, SAT Scores, and Education Funding by State",
+    title = "Standardized Comparison of Graduation Rates, SAT Scores, and Education Funding",
     x = "State",
-    y = "Value"
+    y = "Standardized Value"
   )
 ```
+
+After analyzing each dataset individually, the three datasets were combined to explore relationships among education funding, SAT performance, and graduation rates. Correlation analysis and visualizations suggest that states with higher educational investment often exhibit stronger educational outcomes. However, the relationship is not perfect, indicating that additional factors beyond funding contribute to student success. The combined analysis demonstrates how tidy datasets can be integrated to answer broader questions that would be difficult to investigate with a single dataset.
+
+## Conclusion
+
+The independent analyses identified states with the highest graduation rates, SAT scores, and education funding levels. After combining the datasets, the results suggest that some relationship may exist between educational investment and academic outcomes. However, the strength of these relationships varies across states, suggesting that funding alone may not fully account for differences in graduation rates and SAT performance. Additional factors such as demographics, participation rates, and educational policies likely contribute to student outcomes.
