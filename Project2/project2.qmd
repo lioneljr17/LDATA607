@@ -62,13 +62,457 @@ One challenge will be ensuring that all three datasets use a consistent state id
 When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
 
 ```{r}
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
 
 ```
 
-You can add options to executable code like this
+```{r importing data set }
+
+library(readr)
+HS_grad_rate <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/Project2/HS_grad_rate.csv")
+#View(HS_grad_rate)
+
+dim(HS_grad_rate)
+names(HS_grad_rate)
+head(HS_grad_rate)
+```
+
+```{r tidying dataset}
+grad_clean <- HS_grad_rate %>%
+  column_to_rownames("state") %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("state")
+
+names(grad_clean) <- c(
+  "state",
+  "highschool_2024",
+  "highschool_2023",
+  "highschool_2022",
+  "highschool_2021",
+  "highschool_2020"
+)
+
+grad_tidy <- grad_clean %>%
+  pivot_longer(
+    starts_with("highschool_"),
+    names_to = "year",
+    values_to = "graduation_rate"
+  ) %>%
+  mutate(
+    year = gsub("highschool_", "", year),
+    graduation_rate = as.numeric(graduation_rate)
+  )
+
+
+```
 
 ```{r}
+top5_grad <- grad_clean %>%
+  arrange(desc(highschool_2024)) %>%
+  slice_head(n = 5)
+
+top5_grad
+
+bottom5_grad <- grad_clean %>%
+  arrange(highschool_2024) %>%
+  slice_head(n = 5)
+
+bottom5_grad
+```
+
+```{r}
+grad_clean %>%
+  arrange(desc(highschool_2024)) %>%
+  slice_head(n = 10)
+
+  grad_clean %>%
+  arrange(desc(highschool_2024)) %>%
+  slice_head(n = 10) %>%
+  ggplot(
+    aes(
+      reorder(state, highschool_2024),
+      highschool_2024
+    )
+  ) +
+  geom_col(fill = "steelblue") +
+  coord_flip()
+```
+
+```{r}
+grad_chart <- bind_rows(
+  top5_grad %>% mutate(group = "Top 5"),
+  bottom5_grad %>% mutate(group = "Bottom 5")
+)
+
+ggplot(
+  grad_chart,
+  aes(
+    reorder(state, highschool_2024),
+    highschool_2024,
+    fill = group
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top and Bottom 5 States by Graduation Rate (2024)",
+    x = "State",
+    y = "Graduation Rate (%)"
+  )
+```
+
+**Dataset 2: SAT Scores**
+
+The SAT dataset was also provided in a wide format where states were stored as columns and SAT measures were stored as rows. The dataset was transposed so that each state became an observation. The resulting dataset was then converted into a tidy format where SAT metrics and values were represented consistently.
+
+```{r importing dataset2}
+library(readr)
+SAT_score <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/Project2/SAT_score.csv")
+#View(SAT_score)
+
+
 
 ```
 
-The `echo: false` option disables the printing of code (only output is displayed).
+```{r}
+sat_clean <- SAT_score %>%
+  column_to_rownames("State") %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("state")
+
+names(sat_clean) <- c(
+  "state",
+  "participation_rate",
+  "total_mean_score",
+  "reading_score",
+  "math_score"
+)
+head(sat_clean)
+
+sat_clean <- sat_clean %>%
+  mutate(
+    participation_rate =
+      as.numeric(gsub("%","",na_if(participation_rate,"N/A"))),
+    total_mean_score =
+      as.numeric(total_mean_score),
+    reading_score =
+      as.numeric(reading_score),
+    math_score =
+      as.numeric(math_score)
+  )
+
+sat_tidy <- sat_clean %>%
+  pivot_longer(
+    -state,
+    names_to = "metric",
+    values_to = "value"
+  )
+
+
+```
+
+```{r}
+top5_sat <- sat_clean %>%
+  arrange(desc(total_mean_score)) %>%
+  slice_head(n = 5)
+
+top5_sat
+
+bottom5_sat <- sat_clean %>%
+  arrange(total_mean_score) %>%
+  slice_head(n = 5)
+
+sat_chart <- bind_rows(
+  top5_sat %>% mutate(group = "Top 5"),
+  bottom5_sat %>% mutate(group = "Bottom 5")
+)
+bottom5_sat
+```
+
+```{r}
+sat_clean %>%
+  arrange(desc(total_mean_score)) %>%
+  slice_head(n = 10)
+sat_clean %>%
+  arrange(desc(total_mean_score)) %>%
+  slice_head(n = 10) %>%
+  ggplot(
+    aes(
+      reorder(state,total_mean_score),
+      total_mean_score
+    )
+  ) +
+  geom_col(fill = "darkgreen") +
+  coord_flip()
+
+```
+
+```{r}
+ggplot(
+  sat_chart,
+  aes(
+    reorder(state, total_mean_score),
+    total_mean_score,
+    fill = group
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top and Bottom 5 States by SAT Score",
+    x = "State",
+    y = "Average SAT Score"
+  )
+```
+
+**Dataset 3: School Funding**
+The education funding dataset contained states as columns and funding categories as rows. Similar to the previous datasets, the data was transposed so that states became observations. The funding measures were then standardized and converted to numeric values after removing currency symbols.
+
+```{r importing 3 dataset }
+library(readr)
+states_school_funding <- read_csv("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/Project2/states_school_funding.csv")
+View(states_school_funding)
+```
+
+```{r}
+school_funding_clean <- states_school_funding %>%
+  column_to_rownames("State") %>%
+  t() %>%
+  as.data.frame() %>%
+  rownames_to_column("state")
+
+names(school_funding_clean) <- c(
+  "state",
+  "total_budget",
+  "direct_student_loans"
+)
+
+school_funding_clean <- school_funding_clean %>%
+  mutate(
+    total_budget =
+      as.numeric(gsub("[$,]","",total_budget)),
+    direct_student_loans =
+      as.numeric(gsub("[$,]","",direct_student_loans))
+  )
+
+funding_tidy <- school_funding_clean %>%
+  pivot_longer(
+    -state,
+    names_to = "funding_type",
+    values_to = "amount"
+  )
+
+```
+
+```{r}
+top5_funding <- school_funding_clean %>%
+  arrange(desc(total_budget)) %>%
+  slice_head(n = 5)
+top5_funding
+
+bottom5_funding <- school_funding_clean %>%
+  arrange(total_budget) %>%
+  slice_head(n = 5)
+bottom5_funding
+
+funding_chart <- bind_rows(
+  top5_funding %>% mutate(group = "Top 5"),
+  bottom5_funding %>% mutate(group = "Bottom 5")
+)
+```
+
+```{r}
+school_funding_clean %>%
+  arrange(desc(total_budget)) %>%
+  slice_head(n = 10)
+
+
+
+school_funding_clean %>%
+  arrange(desc(total_budget)) %>%
+  slice_head(n = 10) %>%
+  ggplot(
+    aes(
+      reorder(state,total_budget),
+      total_budget
+    )
+  ) +
+  geom_col(fill = "orange") +
+  coord_flip()
+```
+
+```{r}
+ggplot(
+  funding_chart,
+  aes(
+    reorder(state, total_budget),
+    total_budget,
+    fill = group
+  )
+) +
+  geom_col() +
+  coord_flip() +
+  labs(
+    title = "Top and Bottom 5 States by Education Funding",
+    x = "State",
+    y = "Funding (Millions)"
+  )
+```
+
+**Final Combined Analysis**
+
+```{r}
+combined_data <- grad_clean %>%
+  select(
+    state,
+    highschool_2024
+  ) %>%
+  inner_join(
+    sat_clean %>%
+      select(
+        state,
+        total_mean_score
+      ),
+    by = "state"
+  ) %>%
+  inner_join(
+    school_funding_clean %>%
+      select(
+        state,
+        total_budget
+      ),
+    by = "state"
+  )
+
+```
+
+```{r}
+combined_data %>%
+  arrange(desc(total_mean_score))
+
+
+  combined_data %>%
+  select(
+    highschool_2024,
+    total_mean_score,
+    total_budget
+  ) %>%
+  cor(
+    use = "complete.obs"
+  )
+
+```
+
+```{r Funding vs SAT Score}
+ggplot(
+  combined_data,
+  aes(
+    total_budget,
+    total_mean_score
+  )
+) +
+  geom_point(
+    color = "darkgreen",
+    size = 3
+  ) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE,
+    color = "black"
+  ) +
+  labs(
+    title = "Education Funding vs SAT Scores",
+    x = "Total Budget",
+    y = "SAT Score"
+  )
+```
+
+```{r Funding vs Graduation Rate}
+
+ggplot(
+  combined_data,
+  aes(
+    total_budget,
+    highschool_2024
+  )
+) +
+  geom_point(
+    color = "blue",
+    size = 3
+  ) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE
+  ) +
+  labs(
+    title = "Education Funding vs Graduation Rate",
+    x = "Total Budget",
+    y = "Graduation Rate"
+  )
+```
+
+```{r SAT Score vs Graduation Rate}
+ggplot(
+  combined_data,
+  aes(
+    total_mean_score,
+    highschool_2024
+  )
+) +
+  geom_point(
+    color = "red",
+    size = 3
+  ) +
+  geom_smooth(
+    method = "lm",
+    se = FALSE
+  ) +
+  labs(
+    title = "SAT Score vs Graduation Rate",
+    x = "SAT Score",
+    y = "Graduation Rate"
+  )
+```
+
+```{r}
+combined_long <- combined_data %>%
+  pivot_longer(
+    cols = c(
+      highschool_2024,
+      total_mean_score,
+      total_budget
+    ),
+    names_to = "metric",
+    values_to = "value"
+  )
+
+
+  ggplot(
+    combined_long,
+    aes(
+      state,
+      value,
+      fill = metric
+    )
+  ) +
+  geom_col(
+    position = "dodge"
+  ) +
+  theme(
+    axis.text.x =
+      element_text(
+        angle = 90,
+        hjust = 1
+      )
+  ) +
+  labs(
+    title = "Comparison of Graduation Rates, SAT Scores, and Education Funding by State",
+    x = "State",
+    y = "Value"
+  )
+```
