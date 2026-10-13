@@ -1,0 +1,23 @@
+[
+ {
+  "Title": "Head First Java",
+  "Authors": "Kathy Sierra, Bert Bates",
+  "Publication_Year": 2022,
+  "Publisher": "O'Reilly Media",
+  "Language": "Java"
+ },
+ {
+  "Title": "HTML and CSS: Design and Build Websites",
+  "Authors": "Jon Duckett",
+  "Publication_Year": 2011,
+  "Publisher": "Wiley",
+  "Language": "HTML/CSS"
+ },
+ {
+  "Title": "Python Crash Course",
+  "Authors": "Eric Matthes",
+  "Publication_Year": 2023,
+  "Publisher": "No Starch Press",
+  "Language": "Python"
+ }
+]
