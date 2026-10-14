@@ -1,0 +1,61 @@
+---
+title: "LDATA607LAB6"
+author: "Lionel jr. desroses"
+date: "2026-10-13"
+  html:
+    theme: cosmo
+    toc: true
+    toc-location: left
+    toc-depth: 3
+    code-fold: true
+    code-summary: "Show code"
+    code-tools: true
+    df-print: paged
+    smooth-scroll: true
+    embed-resources: true
+execute:
+  warning: false
+  message: false
+---
+
+## Introduction
+
+In this project, I will explore two common formats for storing and exchanging data: HTML and JSON. Three programming-related books were selected and manually recorded in both formats. This assignment required knowledge of and familiarity with the structure of HTML tables and JSON objects, as well as the ability to import data from these formats into R. After loading both files into separate data frames, the results are compared to determine whether they contain the same information.
+
+**Approach**
+To complete this project, I selected three books related to computer programming: *Head First Java*, *HTML and CSS: Design and Build Websites*, and *Python Crash Course*. For each book, I recorded the title, author(s), publication year, publisher, and programming language.
+
+The book information was manually entered into two separate files:
+
+- An HTML file containing a table of book data.
+
+- A JSON file containing the same information in JSON format.
+
+Using R, I  will load the HTML file into a data frame with the **rvest** package and load the JSON file into a separate data frame with the **jsonlite** package. Finally, I will compare the two data frames to verify that they contain identical data.
+
+**Challenges**
+
+One challenge in this project was ensuring that the HTML and JSON files contained exactly the same information and structure. Although the data may appear identical, differences in column names or data types can cause the resulting data frames to differ when imported into R.
+Another challenge was understanding the different ways that data is represented in HTML and JSON. HTML stores the information in a table format, while JSON stores the same information using key-value pairs. Creating both files manually helped reinforce the structure and purpose of each format.
+
+## Import Library
+
+```{r}
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(tibble)
+library(jsonlite)
+library(xml2)
+library(rvest)
+```
+
+```{}
+```
+
+```{}
+```
+
+```{\}
+```
