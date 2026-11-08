@@ -1,6 +1,6 @@
 ---
 title: "The normal distribution"
-author: ""
+author: "Lionel jr desroses"
 output:
   pdf_document: default
   html_document:
@@ -33,6 +33,7 @@ Let's load the packages.
 ```{r load-packages, message=FALSE}
 library(tidyverse)
 library(openintro)
+library(ggplot2)
 ```
 
 ### The data
@@ -64,6 +65,18 @@ dairy_queen <- fastfood %>%
 1.  Make a plot (or plots) to visualize the distributions of the amount of calories from fat of the options from these two restaurants.  How do their centers, shapes, and spreads compare?
 
 **Insert your answer here**
+```{r}
+dairy_queen$cal_fat
+
+mcdonalds$cal_fat
+
+ggplot(mcdonalds, aes(x = cal_fat)) +
+ geom_histogram(binwidth = 50)
+
+ggplot(dairy_queen, aes(x = cal_fat)) +
+ geom_histogram(binwidth = 50)
+```
+The distributions of calories from fat for both McDonald's and Dairy Queen are unimodal and somewhat right-skewed. Dairy Queen appears to have a higher center, meaning its menu items generally contain more calories from fat.
 
 ## The normal distribution
 
@@ -92,6 +105,7 @@ After initializing a blank plot with `geom_blank()`, the `ggplot2` package (with
     distribution?
 
 **Insert your answer here**
+The distribution appears roughly bell-shaped in the center, but it does not perfectly follow a normal distribution. The histogram shows some right skewness and several observations in the upper tail that fall above what would be expected under a normal model. Therefore, the data are only approximately normal and not perfectly normal.
 
 ## Evaluating the normal distribution
 
@@ -120,6 +134,13 @@ The first argument indicates how many numbers you'd like to generate, which we s
 
 **Insert your answer here**
 
+```{r}
+ggplot(data = NULL, aes(sample = sim_norm)) +
+ geom_line(stat = "qq")
+```
+Answer- No, not all of the points fall exactly on the line. Even data generated from a normal distribution will show random variation. However, the points generally follow the diagonal line much more closely than the Dairy Queen data.
+
+
 Even better than comparing the original plot to a single plot generated from a normal distribution is to compare it to many more plots using the following function. It shows the Q-Q plot corresponding to the original data in the top left corner, and the Q-Q plots of 8 different simulated normal data.  It may be helpful to click the zoom button in the plot window.
 
 ```{r}
@@ -131,11 +152,15 @@ qqnormsim(sample = cal_fat, data = dairy_queen)
     calories are nearly normal?
 
 **Insert your answer here**
+Answer- The Dairy Queen Q-Q plot is similar to the simulated normal plots in the middle portion of the distribution. However, there are noticeable deviations in the tails, particularly in the upper tail.
 
 5.  Using the same technique, determine whether or not the calories from McDonald's
     menu appear to come from a normal distribution.
 
 **Insert your answer here**
+```{r}
+```
+Answer -The McDonald's calories-from-fat distribution does not appear to come from a perfectly normal distribution. The Q-Q plot shows departures from the diagonal line, especially in the tails. While the center of the distribution aligns reasonably well with the line, the skewness and tail behavior suggest that the data are only approximately normal
 
 ## Normal probabilities
 
@@ -164,21 +189,57 @@ Although the probabilities are not exactly the same, they are reasonably close. 
 6.  Write out two probability questions that you would like to answer about any of the restaurants in this dataset.  Calculate those probabilities using both the theoretical normal distribution as well as the empirical distribution (four probabilities in all).  Which one had a closer agreement between the two methods?
 
 **Insert your answer here**
+q1- What is the probability that a Dairy Queen menu item has more than 500 calories from fat?
+```{r}
+pnorm(500, mean = dqmean, sd = dqsd)
+dairy_queen %>%
+ summarise(prob = mean(cal_fat > 500))
+```
+q2-What is the probability that a McDonald's menu item has fewer than 200 calories from fat?
+```{r}
+pnorm(200,
+   mean = mean(mcdonalds$cal_fat),
+   sd = sd(mcdonalds$cal_fat))
 
+mcdonalds %>%
+ summarise(prob = mean(cal_fat < 200))
+```
+Answer--The theoretical probabilities were reasonably close to the empirical probabilities, although they were not identical. The question involving the value closer to the center of the distribution showed better agreement because the normal approximation works best near the center and less well in the tails.
 * * *
+
 
 ## More Practice
 
 7.  Now let's consider some of the other variables in the dataset.  Out of all the different restaurants, which ones' distribution is the closest to normal for sodium?
    
 **Insert your answer here**
+```{r}
+
+fastfood %>% 
+  group_by(restaurant) %>% 
+  ggplot() +
+  geom_histogram(aes(x = sodium), bins = 10) +
+  ggtitle("Sodium in Fast Food Restaurants") +
+  xlab("Sodium") +
+  ylab("Count") +
+  facet_wrap(. ~restaurant)
+```
 
 8.  Note that some of the normal probability plots for sodium distributions seem to have a stepwise pattern. why do you think this might be the case?
 
 **Insert your answer here**
 
+Answer -The stepwise pattern occurs because many sodium values are repeated. Sodium content is often reported in rounded numbers such as 500 mg, 750 mg, or 1000 mg. Since many menu items share identical sodium values, the quantiles are repeated, producing horizontal steps in the Q-Q plot rather than a smooth pattern.
+
 9.  As you can see, normal probability plots can be used both to assess normality and visualize skewness.  Make a normal probability plot for the total carbohydrates from a restaurant of your choice.  Based on this normal probability plot, is this variable left skewed, symmetric, or right skewed? Use a histogram to confirm your findings.
 
 **Insert your answer here**
+```{r}
+ggplot(mcdonalds, aes(sample = total_carb)) +
+ geom_line(stat = "qq")
 
+ggplot(mcdonalds, aes(x = total_carb)) +
+ geom_histogram(binwidth = 10)
+```
+Answer-The total carbohydrate distribution appears to be right-skewed. In the Q-Q plot, the upper tail bends upward away from the reference line, which is characteristic of right-skewed data. The histogram confirms this pattern by showing a longer tail extending toward higher carbohydrate values. Therefore, the variable is not symmetric and exhibits positive skewness.
 * * *

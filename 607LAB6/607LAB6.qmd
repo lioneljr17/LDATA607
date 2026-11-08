@@ -1,7 +1,7 @@
 ---
 title: "LDATA607LAB6"
 author: "Lionel jr. desroses"
-date: "2026-10-13"
+date: "2026-10-14"
   html:
     theme: cosmo
     toc: true
@@ -22,8 +22,7 @@ execute:
 
 In this project, I will explore two common formats for storing and exchanging data: HTML and JSON. Three programming-related books were selected and manually recorded in both formats. This assignment required knowledge of and familiarity with the structure of HTML tables and JSON objects, as well as the ability to import data from these formats into R. After loading both files into separate data frames, the results are compared to determine whether they contain the same information.
 
-**Approach**
-To complete this project, I selected three books related to computer programming: *Head First Java*, *HTML and CSS: Design and Build Websites*, and *Python Crash Course*. For each book, I recorded the title, author(s), publication year, publisher, and programming language.
+**Approach** To complete this project, I selected three books related to computer programming: *Head First Java*, *HTML and CSS: Design and Build Websites*, and *Python Crash Course*. For each book, I recorded the title, author(s), publication year, publisher, and programming language.
 
 The book information was manually entered into two separate files:
 
@@ -35,8 +34,7 @@ Using R, I  will load the HTML file into a data frame with the **rvest** packag
 
 **Challenges**
 
-One challenge in this project was ensuring that the HTML and JSON files contained exactly the same information and structure. Although the data may appear identical, differences in column names or data types can cause the resulting data frames to differ when imported into R.
-Another challenge was understanding the different ways that data is represented in HTML and JSON. HTML stores the information in a table format, while JSON stores the same information using key-value pairs. Creating both files manually helped reinforce the structure and purpose of each format.
+One challenge in this project was ensuring that the HTML and JSON files contained exactly the same information and structure. Although the data may appear identical, differences in column names or data types can cause the resulting data frames to differ when imported into R. Another challenge was understanding the different ways that data is represented in HTML and JSON. HTML stores the information in a table format, while JSON stores the same information using key-value pairs. Creating both files manually helped reinforce the structure and purpose of each format.
 
 ## Import Library
 
@@ -51,11 +49,62 @@ library(xml2)
 library(rvest)
 ```
 
-```{}
+## **Load HTML Data**
+
+In this section, The HTML file containing the programming book information is loaded into R. The table is extracted from the HTML file from my GitHub repository and stored as a data frame for further analysis.
+
+```{r}
+html_df <- read_html("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607LAB6/Books.html") |>
+  html_table((fill = TRUE))
+
+html_df  <- html_df[[1]]
+
+html_df <-as.data.frame(html_df)
+
+
 ```
 
-```{}
+## **Load JSON Data**
+
+In this section. The JSON file containing the same book information is loaded into a separate data frame using the **jsonlite** package.
+
+```{r}
+json_df <- fromJSON("https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607LAB6/Books.json")
+
+json_df
 ```
 
-```{\}
+```{r}
+str(html_df)
+str(json_df)
 ```
+
+## **Standardize Column Names**
+
+In this section, The HTML and JSON files use slightly different column names. To ensure a valid comparison, the column names in the JSON data frame are updated to match those in the HTML data frame
+
+```{r}
+names(json_df)
+
+names(html_df)
+names(json_df) <- names(html_df)
+
+#html_df$Publication.Year <- as.numeric(html_df$Publication.Year)
+```
+
+## **Compare the Data Frames**
+
+Once both data frames have the same structure, they are compared to determine whether they contain identical information. The comparison returned True, indicating that both the HTML and JSON files contained the same book information
+
+```{r}
+identical(html_df, json_df)
+
+all.equal(html_df, json_df)
+
+comparison_result <- all.equal(html_df, json_df)
+comparison_result
+```
+
+## **Conclusion**
+
+Both the HTML and JSON files were successfully created, imported into R, and converted into data frames. After standardizing the column names and object types, the two data frames were compared and found to contain identical information. This project provided valuable experience working with HTML and JSON data formats and demonstrated how R can be used to validate data consistency across multiple sources.

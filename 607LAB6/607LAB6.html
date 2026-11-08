@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Lionel jr. desroses">
-<meta name="dcterms.date" content="2026-10-13">
+<meta name="dcterms.date" content="2026-10-14">
 
 <title>LDATA607LAB6</title>
 <style>
@@ -3166,7 +3166,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">October 13, 2026</p>
+      <p class="date">October 14, 2026</p>
     </div>
   </div>
   
@@ -3203,9 +3203,99 @@ vertical-align: -.125em;
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(xml2)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rvest)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<pre><code></code></pre>
-<pre><code></code></pre>
-<pre class="{\}"><code></code></pre>
+</section>
+<section id="load-html-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-html-data"><strong>Load HTML Data</strong></h2>
+<p>In this section, The HTML file containing the programming book information is loaded into R. The table is extracted from the HTML file from my GitHub repository and stored as a data frame for further analysis.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>html_df <span class="ot">&lt;-</span> <span class="fu">read_html</span>(<span class="st">&quot;https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607LAB6/Books.html&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_table</span>((<span class="at">fill =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>html_df  <span class="ot">&lt;-</span> html_df[[<span class="dv">1</span>]]</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>html_df <span class="ot">&lt;-</span><span class="fu">as.data.frame</span>(html_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="load-json-data" class="level2">
+<h2 class="anchored" data-anchor-id="load-json-data"><strong>Load JSON Data</strong></h2>
+<p>In this section. The JSON file containing the same book information is loaded into a separate data frame using the <strong>jsonlite</strong> package.</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>json_df <span class="ot">&lt;-</span> <span class="fu">fromJSON</span>(<span class="st">&quot;https://raw.githubusercontent.com/lioneljr17/LDATA607/refs/heads/main/607LAB6/Books.json&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>json_df</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                                    Title                  Authors
+1                         Head First Java Kathy Sierra, Bert Bates
+2 HTML and CSS: Design and Build Websites              Jon Duckett
+3                     Python Crash Course             Eric Matthes
+  Publication_Year       Publisher Language
+1             2022  O&#39;Reilly Media     Java
+2             2011           Wiley HTML/CSS
+3             2023 No Starch Press   Python</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(html_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&#39;data.frame&#39;:   3 obs. of  5 variables:
+ $ Title           : chr  &quot;Head First Java&quot; &quot;HTML and CSS: Design and Build Websites&quot; &quot;Python Crash Course&quot;
+ $ Authors         : chr  &quot;Kathy Sierra, Bert Bates&quot; &quot;Jon Duckett&quot; &quot;Eric Matthes&quot;
+ $ Publication Year: int  2022 2011 2023
+ $ Publisher       : chr  &quot;O&#39;Reilly Media&quot; &quot;Wiley&quot; &quot;No Starch Press&quot;
+ $ Language        : chr  &quot;Java&quot; &quot;HTML/CSS&quot; &quot;Python&quot;</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(json_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>&#39;data.frame&#39;:   3 obs. of  5 variables:
+ $ Title           : chr  &quot;Head First Java&quot; &quot;HTML and CSS: Design and Build Websites&quot; &quot;Python Crash Course&quot;
+ $ Authors         : chr  &quot;Kathy Sierra, Bert Bates&quot; &quot;Jon Duckett&quot; &quot;Eric Matthes&quot;
+ $ Publication_Year: int  2022 2011 2023
+ $ Publisher       : chr  &quot;O&#39;Reilly Media&quot; &quot;Wiley&quot; &quot;No Starch Press&quot;
+ $ Language        : chr  &quot;Java&quot; &quot;HTML/CSS&quot; &quot;Python&quot;</code></pre>
+</div>
+</div>
+</section>
+<section id="standardize-column-names" class="level2">
+<h2 class="anchored" data-anchor-id="standardize-column-names"><strong>Standardize Column Names</strong></h2>
+<p>In this section, The HTML and JSON files use slightly different column names. To ensure a valid comparison, the column names in the JSON data frame are updated to match those in the HTML data frame</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(json_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Title&quot;            &quot;Authors&quot;          &quot;Publication_Year&quot; &quot;Publisher&quot;       
+[5] &quot;Language&quot;        </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(html_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] &quot;Title&quot;            &quot;Authors&quot;          &quot;Publication Year&quot; &quot;Publisher&quot;       
+[5] &quot;Language&quot;        </code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(json_df) <span class="ot">&lt;-</span> <span class="fu">names</span>(html_df)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co">#html_df$Publication.Year &lt;- as.numeric(html_df$Publication.Year)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="compare-the-data-frames" class="level2">
+<h2 class="anchored" data-anchor-id="compare-the-data-frames"><strong>Compare the Data Frames</strong></h2>
+<p>Once both data frames have the same structure, they are compared to determine whether they contain identical information. The comparison returned True, indicating that both the HTML and JSON files contained the same book information</p>
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">identical</span>(html_df, json_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">all.equal</span>(html_df, json_df)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>comparison_result <span class="ot">&lt;-</span> <span class="fu">all.equal</span>(html_df, json_df)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>comparison_result</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] TRUE</code></pre>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion"><strong>Conclusion</strong></h2>
+<p>Both the HTML and JSON files were successfully created, imported into R, and converted into data frames. After standardizing the column names and object types, the two data frames were compared and found to contain identical information. This project provided valuable experience working with HTML and JSON data formats and demonstrated how R can be used to validate data consistency across multiple sources.</p>
 </section>
 
 </main>
