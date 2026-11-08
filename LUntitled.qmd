@@ -1,0 +1,291 @@
+---
+title: "Untitled"
+format: html
+editor: visual
+---
+
+```{r setup, include=FALSE}
+library(jsonlite)
+library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+```
+
+## introduction
+
+For this assignment, I worked with JSON data obtained from the Nobel Prize public API. The first step was to explore the structure of the API responses to understand how the data was organized and identify the sections that contained information about Nobel Prizes and Nobel laureates. While exploring the API, I examined the metadata and pagination details to better understand how records were returned and how the data could be retrieved for analysis.
+
+After collecting the data, I used R and the tidyverse packages to transform the nested JSON structures into tidy data frames. Several nested fields, including birth country, birth city, birth year, award year, category, and gender, were extracted and organized into a format suitable for analysis. Once the data was prepared, I developed four research questions to explore patterns in the Nobel Prize data. These questions focused on the countries that produced the most laureates, trends in Nobel Prize awards over time, female representation across Nobel Prize categories, and the overall gender distribution of Nobel laureates.
+
+```{r data-prep, include=FALSE}
+prizes_json <- fromJSON(
+  "https://api.nobelprize.org/2.1/nobelPrizes"
+)
+
+laureates_json <- fromJSON(
+  "https://api.nobelprize.org/2.1/laureates"
+)
+
+
+
+```
+
+\## Data Collection and API Exploration
+
+::: callout-note
+\### Nobel Prize Awards API
+
+The Nobel Prize awards API returned three top-level sections:
+
+\- \`nobelPrizes\`
+
+\- \`meta\`
+
+\- \`links\`
+
+The metadata indicated that the API was paginated, returning 25 records per request and containing 688 total prize records.
+
+The links section provided URLs for the first, current, next, and last pages of data.
+:::
+
+```{r}
+names(prizes_json)
+prizes_json$meta
+prizes_json$links
+
+
+```
+
+::: callout-note
+### Data Preparation
+
+The JSON data contained nested structures that required transformation before analysis.
+
+The \`laureates\` dataset was converted into a tibble and nested fields such as birth country and birth city were extracted to create a tidy dataset suitable for analysis.
+:::
+
+```{r}
+names(laureates_json)
+laureates_json$meta
+laureates_json$links
+
+```
+
+```{r}
+prizes_df <- as_tibble(prizes_json$nobelPrizes)
+
+laureates_df <- as_tibble(laureates_json$laureates)
+
+prize_df <- laureates_df %>%
+  unnest(nobelPrizes, names_sep = "_")
+
+
+```
+
+```{r}
+laureates_tidy <- laureates_df %>%
+  mutate(
+    birth_country = birth$place$country$en,
+    birth_city = birth$place$city$en,
+    birth_year = birth$year
+  )
+
+glimpse(laureates_tidy)
+```
+
+----
+
+::: callout-tip
+# Question 1
+
+Which countries have produced the largest number of Nobel laureates?
+:::
+
+## Code
+
+```{r}
+country_counts <-
+  laureates_tidy %>%
+  count(birth_country, sort = TRUE)
+
+
+```
+
+## Result
+
+```{r}
+country_counts
+```
+
+## **Visualization**
+
+```{r}
+country_counts %>%
+  slice_max(n, n = 10) %>%
+  ggplot(aes(
+    x = reorder(birth_country, n),
+    y = n
+  )) +
+  geom_col(fill = "steelblue") +
+  coord_flip() +
+  labs(
+    title = "Top Birth Countries of Nobel Laureates",
+    x = "Country",
+    y = "Number of Laureates"
+  )
+```
+
+-   
+
+    ## Interpretations 
+
+    The United States produced the largest number of Nobel laureates in the dataset, followed by Germany, India, Japan, and Prussia. This suggests that Nobel Prize recipients are concentrated among a relatively small number of countries with strong traditions of scientific and academic research.
+
+::: callout-tip
+#  Question 2
+
+How has the number of Nobel Prizes awarded changed over time?
+:::
+
+## Code
+
+```{r}
+prizes_per_year <-
+  prizes_df %>%
+  count(awardYear)
+
+prizes_per_year
+```
+
+## plot
+
+```{r}
+ggplot(
+  prizes_per_year,
+  aes(
+    x = as.numeric(awardYear),
+    y = n
+  )
+) +
+  geom_line(color = "darkred") +
+  geom_point() +
+  labs(
+    title = "Nobel Prizes Awarded Over Time",
+    x = "Year",
+    y = "Number of Awards"
+  )
+```
+
+## interpretation
+
+The number of Nobel Prizes awarded each year appears relatively stable during the years included in this dataset. Most years contain five awards corresponding to the major Nobel Prize categories.
+
+———
+
+::: {.callout-tip}
+
+#  Question 3
+
+Which Nobel Prize categories have the highest percentage of female laureates?
+
+:::
+
+## code
+
+```{r test}
+
+prize_df <- prize_df %>%
+  mutate(
+    category_name = nobelPrizes_category$en,
+    award_year = as.numeric(nobelPrizes_awardYear),
+    birth_country = birth$place$country$en,
+    birth_year = as.numeric(birth$year)
+  )
+
+female_percent <-
+  prize_df %>%
+  group_by(category_name) %>%
+  summarize(
+    total = n(),
+    female = sum(gender == "female", na.rm = TRUE),
+    pct_female = round(
+      female / total * 100,
+      2
+    )
+  ) %>%
+  arrange(desc(pct_female))
+
+female_percent
+```
+
+## Plot 
+
+```{r}
+ggplot(
+  female_percent,
+  aes(
+    x = reorder(category_name, pct_female),
+    y = pct_female
+  )
+) +
+  geom_col(fill = "purple") +
+  coord_flip() +
+  labs(
+    title = "Percentage of Female Laureates by Category",
+    x = "Category",
+    y = "Percent Female"
+  )
+```
+
+## Interpretation
+
+Female representation varies considerably across Nobel Prize categories. In this sample, Chemistry had the highest percentage of female laureates, while several categories contained only male recipients. This result highlights the historical gender imbalance that has existed within many award categories.
+
+---
+
+::: {.callout-tip}
+
+#  Question 4
+
+What is the distribution of Nobel laureates by gender?
+
+:::
+
+## Code
+
+```{r}
+gender_counts <- prize_df %>%
+  count(gender)
+
+gender_counts
+
+ggplot(
+  gender_counts,
+  aes(
+    x = gender,
+    y = n,
+    fill = gender
+  )
+) +
+  geom_col() +
+  labs(
+    title = "Distribution of Nobel Laureates by Gender",
+    x = "Gender",
+    y = "Number of Laureates"
+  )
+```
+
+## Interpretation
+
+The Nobel Prize dataset is heavily dominated by male laureates. Female laureates represent a much smaller proportion of award recipients, reflecting historical disparities in access to education, research opportunities, and professional recognition.
+
+---
+
+# Conclusion
+
+For this assignment, I successfully retrieved Nobel Prize data from a public JSON API and transformed the nested data into tidy data frames using R. Throughout the process, I explored the API structure, reviewed metadata and pagination information, and extracted key variables needed to perform the analysis. This provided valuable experience working with real-world JSON data and preparing it for analysis using the tidyverse.
+
+The analysis revealed several interesting findings. The United States produced the largest number of Nobel laureates within the dataset, followed by Germany, India, Japan, and Prussia. Examination of Nobel Prize awards over time showed a relatively stable pattern during the years included in the dataset. When analyzing gender representation by category, Chemistry had the highest percentage of female laureates, while several categories contained only male recipients in the sample analyzed. Finally, the overall gender distribution showed that male laureates significantly outnumbered female laureates, highlighting the historical gender imbalance present in Nobel Prize awards.
+
+Overall, this assignment helped strengthen my understanding of JSON data structures, API data retrieval, data wrangling, and visualization techniques in R. It also demonstrated how publicly available API data can be transformed into meaningful insights through careful preparation and analysis.
